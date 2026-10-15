@@ -34,6 +34,13 @@ export const photos: FanPhoto[] = [
 		height: 3000,
 	},
 	{
+		src: "/photos/ive/ive-60ec964e8a59.webp",
+		group: "IVE",
+		alt: "IVE 线下现场 · 04",
+		width: 1688,
+		height: 3000,
+	},
+	{
 		src: "/photos/nmixx/nmixx-56bc484c8a25.webp",
 		group: "NMIXX",
 		alt: "NMIXX 线下现场 · 01",

@@ -33,7 +33,7 @@ export const navBarConfig: NavBarConfig = {
 export const profileConfig: ProfileConfig = {
 	avatar: "/images/avatar.svg",
 	name: "Junnie",
-	bio: "IVE & NMIXX ♡ 把喜欢带到现场，把心动留在照片里。",
+	bio: "芙4&爻6，iz*one&ive&nmixx。",
 	links: [
 		...(socialProfiles.spotify
 			? [
