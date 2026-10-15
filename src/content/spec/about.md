@@ -1,9 +1,17 @@
-# About
-This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
+# 关于 Junnie
 
-::github{repo="saicaca/fuwari"}
+欢迎来到 **Junnie的追星角落**。
 
-> ### Sources of images used in this site
-> - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+这里住着我对 **IVE** 和 **NMIXX** 的喜欢。除了屏幕里的舞台，我也会去线下，在现场按下快门，记录真正见到她们时的瞬间。
+
+## 你可以在这里找到
+
+- **线下返图**：我亲手拍下的 IVE、NMIXX 现场照片。
+- **追星手记**：碎碎念、听歌感想和每一次相遇的回忆。
+- **心动收藏**：喜欢的作品、官方链接与自己的返图。
+
+愿我们在喜欢一个人的时候，也把自己的生活过得热气腾腾。
+
+---
+
+个人粉丝主页。相册中的线下照片由 Junnie 拍摄，转载请先征得同意并注明出处。

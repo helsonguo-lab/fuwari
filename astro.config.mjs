@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { loadEnvFile } from "node:process";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwind from "@astrojs/tailwind";
@@ -25,8 +27,9 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
 
 // https://astro.build/config
+if (existsSync(".env")) loadEnvFile(".env");
 export default defineConfig({
-	site: "https://fuwari.vercel.app/",
+	site: process.env.SITE_URL || "https://home.wonyoung.xyz/",
 	base: "/",
 	trailingSlash: "always",
 	integrations: [

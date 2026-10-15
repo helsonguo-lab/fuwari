@@ -1,0 +1,15 @@
+---
+import { favorites } from "../data/collection";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+---
+<MainGridLayout title="心动收藏" description="收藏喜欢的作品与闪闪发光的瞬间。">
+  <section class="card-base p-7 md:p-9">
+    <p class="text-xs tracking-[.24em] text-[var(--primary)] font-bold mb-3">A FEW THINGS I LOVE ✦</p>
+    <h1 class="text-3xl font-bold text-90">心动收藏</h1>
+    <p class="text-60 mt-4 leading-7">把喜欢的作品、难忘的舞台与自己的返图，收进同一个角落。</p>
+    <div class="grid gap-4 mt-7">
+      {favorites.map(item => <a href={item.url} target="_blank" rel="noopener noreferrer" class="btn-regular block p-5 rounded-xl"><h2 class="font-bold text-lg">{item.title} ↗</h2><p class="text-60 mt-2">{item.note}</p></a>)}
+      {favorites.length === 0 && <div class="rounded-2xl border border-dashed border-black/15 dark:border-white/20 px-6 py-14 text-center"><div class="text-4xl text-[var(--primary)] mb-4" aria-hidden="true">✧</div><h2 class="text-xl font-bold text-90">下一次心动，留在这里</h2><p class="text-60 mt-3">收藏夹正在慢慢填满，新的喜欢很快就来。</p></div>}
+    </div>
+  </section>
+</MainGridLayout>

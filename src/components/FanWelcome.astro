@@ -1,0 +1,31 @@
+---
+import { photos } from "../data/photos";
+import { url } from "../utils/url-utils";
+---
+<section class="card-base p-7 md:p-9 mb-4 relative overflow-hidden">
+  <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">JUNNIE’S FAN JOURNAL ✦</p>
+  <h1 class="text-3xl md:text-4xl font-bold text-90 leading-snug">把喜欢带到现场，<br />把心动留在这里。</h1>
+  <p class="text-60 leading-7 mt-4 max-w-xl">欢迎来到 Junnie的追星角落。<br />关于 IVE、NMIXX，还有我在台下按下快门的那些瞬间。</p>
+  <div class="flex flex-wrap gap-3 mt-6">
+    <a href={url('/gallery/')} class="btn-regular rounded-xl px-5 py-3 font-bold">看看我的线下返图 ↗</a>
+    <a href={url('/archive/')} class="btn-plain rounded-xl px-5 py-3">翻开追星手记</a>
+  </div>
+</section>
+<section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
+  {[{ name: 'IVE', fandom: 'DIVE', note: '每一次相遇，都是心动的延续。', tone: 'ive' }, { name: 'NMIXX', fandom: 'NSWER', note: '把舞台的能量，带回日常里。', tone: 'nmixx' }].map(group => (
+    <a href={url('/gallery/') + '?group=' + group.name} class:list={['group-card card-base p-7', group.tone]}>
+      <p class="text-xs tracking-[.2em] opacity-70">{group.fandom} ♡</p>
+      <h2 class="text-3xl font-bold mt-2 tracking-wide">{group.name} <span class="text-lg float-right" aria-hidden="true">↗</span></h2>
+      <p class="text-sm mt-3 opacity-80">{group.note}</p>
+      <p class="text-xs mt-5 opacity-60">{photos.some(photo => photo.group === group.name) ? photos.filter(photo => photo.group === group.name).length + ' 张现场记忆' : '现场照片 · 整理中'}</p>
+    </a>
+  ))}
+</section>
+<style>
+  .group-card { transition: transform .2s, box-shadow .2s; }
+  .group-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px #44305c12; }
+  .ive { background: linear-gradient(120deg, #f6e7f2, #f5f0fc); color: #7d467b; }
+  .nmixx { background: linear-gradient(120deg, #e3f2f5, #eeecfc); color: #426878; }
+  :global(.dark) .ive { background: linear-gradient(120deg, #372638, #2b253b); color: #e2b6de; }
+  :global(.dark) .nmixx { background: linear-gradient(120deg, #20383d, #28293d); color: #b0dbe4; }
+</style>
