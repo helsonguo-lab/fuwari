@@ -14,7 +14,7 @@ import MainGridLayout from "../layouts/MainGridLayout.astro";
       <p class="text-sm text-60 mb-5" data-count aria-live="polite">共 {photos.length} 张照片</p>
       <div class="columns-1 sm:columns-2 gap-4" data-photo-grid>
         {photos.map(photo => <figure class="shot break-inside-avoid mb-5" data-group={photo.group}>
-          <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" class="rounded-xl w-full h-auto cursor-zoom-in" tabindex="0" role="button" aria-label={'放大查看：' + photo.alt} />
+          <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" class="rounded-xl w-full h-auto cursor-zoom-in" tabindex="0" role="button" aria-label={'放大查看：' + photo.alt} />
           <figcaption class="pt-3 px-1"><div class="text-90 font-medium">{photo.event || photo.alt}</div><p class="text-xs text-60 mt-1">{[photo.group, photo.date, photo.location].filter(Boolean).join(' · ')}</p></figcaption>
         </figure>)}
       </div>
