@@ -51,6 +51,8 @@ export const photos: FanPhoto[] = [
 - 输出目录：`dist`
 - Node.js 版本：22 或更新版本
 
+现有 Cloudflare Workers 项目是 `fuwari`，配置见 `wrangler.jsonc`。如未启用 Git 自动部署，可在已登录 Cloudflare 的电脑上先运行 `pnpm build`，再运行 `npx wrangler@4 deploy --keep-vars`，发布到现有项目。
+
 网站默认地址已设为 `https://home.wonyoung.xyz/`，用于 RSS、站点地图和分享链接。如果 Cloudflare 中已设置 `SITE_URL` 环境变量，请将其同步为该地址。
 
 更新后检查首页、线下返图、追星手记、收藏、搜索及 RSS。现有域名解析无需因本次内容更新而修改。
