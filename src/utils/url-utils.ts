@@ -16,12 +16,15 @@ export function getPostUrlBySlug(slug: string): string {
 	return url(`/posts/${slug}/`);
 }
 
-export function getTagUrl(tag: string): string {
+export function getTagUrl(tag: string, category?: string | null): string {
 	if (!tag) return url("/archive/");
+	if (category === "科研手记")
+		return url(`/research/?tag=${encodeURIComponent(tag.trim())}`);
 	return url(`/archive/?tag=${encodeURIComponent(tag.trim())}`);
 }
 
 export function getCategoryUrl(category: string | null): string {
+	if (category === "科研手记") return url("/research/");
 	if (
 		!category ||
 		category.trim() === "" ||

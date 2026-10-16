@@ -4,7 +4,7 @@ published: 2026-10-15
 description: 关于 IVE、NMIXX，和那些亲手拍下的现场记忆。
 image: /images/baby-blue-dots.svg
 tags: [开站, IVE, NMIXX]
-category: 追星日记
+category: 线下
 draft: false
 ---
 
@@ -14,8 +14,8 @@ draft: false
 
 这里会慢慢装进关于 **IVE** 和 **NMIXX** 的喜欢：听歌时的心情、看舞台时的感动，还有我去线下亲手拍下的照片。
 
-## 慢慢更新，也慢慢收藏
+## 慢慢更新，也慢慢记录
 
-[线下返图](/gallery/)、追星手记、心动收藏……每一页都可以慢慢填满。
+[线下返图](/gallery/)、[追星手记](/archive/)、[科研手记](/research/)……每一页都可以慢慢填满。
 
 希望很久以后再翻开这里，还能记起此刻的心情。

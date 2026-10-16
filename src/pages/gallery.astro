@@ -2,11 +2,11 @@
 import { photos } from "../data/photos";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 ---
-<MainGridLayout title="线下返图" description="Junnie 的 IVE 与 NMIXX 线下照片。把现场的光留在这里。">
+<MainGridLayout title="线下返图" description="和你们的瞬间">
   <section class="card-base p-6 md:p-9" data-pagefind-body>
     <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">THROUGH MY LENS ✦</p>
     <h1 class="text-3xl font-bold text-90">线下返图</h1>
-    <p class="text-60 leading-7 mt-4">我在台下，你们在光里。<br />关于 IVE 和 NMIXX，那些由我亲手拍下的心动瞬间。</p>
+    <p class="text-60 leading-7 mt-4">和你们的瞬间</p>
     <fan-gallery>
       <div class="flex flex-wrap gap-2 mt-6 mb-7" role="group" aria-label="按团体筛选照片">
         {['全部', 'IVE', 'NMIXX'].map((group, index) => <button type="button" data-filter={index === 0 ? 'all' : group} aria-pressed={index === 0 ? 'true' : 'false'} class="filter btn-regular rounded-xl px-5 py-2">{group} <span class="opacity-60 text-xs ml-1">{index === 0 ? photos.length : photos.filter(p => p.group === group).length}</span></button>)}
@@ -15,7 +15,7 @@ import MainGridLayout from "../layouts/MainGridLayout.astro";
       <div class="columns-1 sm:columns-2 gap-4" data-photo-grid>
         {photos.map(photo => <figure class="shot break-inside-avoid mb-5" data-group={photo.group}>
           <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" class="rounded-xl w-full h-auto cursor-zoom-in" tabindex="0" role="button" aria-label={'放大查看：' + photo.alt} />
-          <figcaption class="pt-3 px-1"><div class="text-90 font-medium">{photo.event || photo.alt}</div><p class="text-xs text-60 mt-1">{[photo.group, photo.date, photo.location].filter(Boolean).join(' · ')}</p></figcaption>
+          <figcaption class="pt-3 px-1 text-sm text-60">{[photo.group, photo.date, photo.location].filter(Boolean).join(' · ')}</figcaption>
         </figure>)}
       </div>
       <div data-empty hidden={photos.length > 0} class="empty-state rounded-2xl border border-dashed border-black/15 dark:border-white/20 px-5 py-14 text-center">

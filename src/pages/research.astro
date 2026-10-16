@@ -1,0 +1,17 @@
+---
+import ArchivePanel from "../components/ArchivePanel.svelte";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import { getSortedPostsList } from "../utils/content-utils";
+
+const posts = (await getSortedPostsList()).filter(
+	post => post.data.category === "科研手记",
+);
+---
+
+<MainGridLayout title="科研手记" description="科研中的阅读、思考与记录。">
+  <section class="card-base p-7 md:p-9 mb-4" data-pagefind-body>
+    <h1 class="text-3xl font-bold text-90">科研手记</h1>
+    <p class="text-60 mt-4 leading-7">阅读、思考与记录。</p>
+  </section>
+  <ArchivePanel sortedPosts={posts} emptyMessage="手记正在整理中。" client:only="svelte" />
+</MainGridLayout>

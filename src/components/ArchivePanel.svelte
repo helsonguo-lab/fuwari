@@ -3,15 +3,21 @@ import { onMount } from "svelte";
 
 import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
-import { getPostUrlBySlug } from "../utils/url-utils";
+import { getCategoryUrl, getPostUrlBySlug } from "../utils/url-utils";
 
 export let tags: string[] = [];
 export let categories: string[] = [];
 export let sortedPosts: Post[] = [];
+export let categoryTabs: string[] = [];
+export let emptyMessage = "这里还没有手记。";
 
 const params = new URLSearchParams(window.location.search);
 tags = params.has("tag") ? params.getAll("tag") : [];
 categories = params.has("category") ? params.getAll("category") : [];
+if (categoryTabs.length > 0) {
+	categories = categories.filter(category => categoryTabs.includes(category));
+	if (categories.length === 0 && tags.length === 0) categories = [categoryTabs[0]];
+}
 const uncategorized = params.get("uncategorized");
 
 interface Post {
@@ -30,6 +36,7 @@ interface Group {
 }
 
 let groups: Group[] = [];
+let ready = false;
 
 function formatDate(date: Date) {
 	const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -82,10 +89,22 @@ onMount(async () => {
 	groupedPostsArray.sort((a, b) => b.year - a.year);
 
 	groups = groupedPostsArray;
+	ready = true;
 });
 </script>
 
 <div class="card-base px-8 py-6">
+    {#if categoryTabs.length > 0}
+        <nav class="flex gap-3 mb-5" aria-label="追星手记分类">
+            {#each categoryTabs as category}
+                <a href={getCategoryUrl(category)} aria-current={categories.includes(category) ? "page" : undefined}
+                   class="btn-regular rounded-xl px-5 py-2" class:category-active={categories.includes(category)}>{category}</a>
+            {/each}
+        </nav>
+    {/if}
+    {#if ready && groups.length === 0}
+        <p class="text-60 text-center py-10" role="status">{emptyMessage}</p>
+    {/if}
     {#each groups as group}
         <div>
             <div class="flex flex-row w-full items-center h-[3.75rem]">
@@ -149,3 +168,7 @@ onMount(async () => {
         </div>
     {/each}
 </div>
+
+<style>
+    .category-active { background: var(--primary); color: var(--card-bg); }
+</style>

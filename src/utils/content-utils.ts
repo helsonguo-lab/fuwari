@@ -1,7 +1,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getCategoryUrl } from "@utils/url-utils.ts";
+import { getCategoryUrl, getTagUrl } from "@utils/url-utils.ts";
 
 // // Retrieve posts and sort them by publication date
 async function getRawSortedPosts() {
@@ -49,6 +49,7 @@ export async function getSortedPostsList(): Promise<PostForList[]> {
 export type Tag = {
 	name: string;
 	count: number;
+	url: string;
 };
 
 export async function getTagList(): Promise<Tag[]> {
@@ -57,8 +58,13 @@ export async function getTagList(): Promise<Tag[]> {
 	});
 
 	const countMap: { [key: string]: number } = {};
-	allBlogPosts.forEach((post: { data: { tags: string[] } }) => {
+	const researchOnly = new Map<string, boolean>();
+	allBlogPosts.forEach((post) => {
 		post.data.tags.forEach((tag: string) => {
+			researchOnly.set(
+				tag,
+				(researchOnly.get(tag) ?? true) && post.data.category === "科研手记",
+			);
 			if (!countMap[tag]) countMap[tag] = 0;
 			countMap[tag]++;
 		});
@@ -69,7 +75,11 @@ export async function getTagList(): Promise<Tag[]> {
 		return a.toLowerCase().localeCompare(b.toLowerCase());
 	});
 
-	return keys.map((key) => ({ name: key, count: countMap[key] }));
+	return keys.map((key) => ({
+		name: key,
+		count: countMap[key],
+		url: getTagUrl(key, researchOnly.get(key) ? "科研手记" : undefined),
+	}));
 }
 
 export type Category = {
@@ -82,7 +92,7 @@ export async function getCategoryList(): Promise<Category[]> {
 	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
-	const count: { [key: string]: number } = {};
+	const count: { [key: string]: number } = { 线下: 0, 生日: 0, 科研手记: 0 };
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
 		if (!post.data.category) {
 			const ucKey = i18n(I18nKey.uncategorized);

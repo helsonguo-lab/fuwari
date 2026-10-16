@@ -26,7 +26,7 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Home,
 		{ name: "线下返图", url: "/gallery/" },
 		{ name: "追星手记", url: "/archive/" },
-		{ name: "心动收藏", url: "/collection/" },
+		{ name: "科研手记", url: "/research/" },
 		LinkPreset.About,
 	],
 };

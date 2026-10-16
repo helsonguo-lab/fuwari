@@ -40,16 +40,18 @@ export const photos: FanPhoto[] = [
 
 - 名称、简介、主题色、头像、封面及社交链接：src/config.ts
 - 首页欢迎语：src/components/FanWelcome.astro
-- 追星日记：src/content/posts/
+- 文章：src/content/posts/，复用 Fuwari 原生 Markdown；追星手记 category 只填“线下”或“生日”，科研文章填“科研手记”。
+- 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。
 - 关于页面：src/content/spec/about.md
-- 收藏链接：src/data/collection.ts
-- Spotify、Threads 个人主页链接：src/data/social.ts，填好后自动在头像简介下显示图标。
+- 科研手记入口：src/pages/research.astro，按 category 自动收录；旧收藏入口重定向至科研手记。
+- 专辑封面：src/data/albums.ts 与 public/images/albums/，点击 Spotify 图标打开原生毛玻璃弹层，只展示封面；按 Esc、关闭图标或遮罩空白处关闭。
+- 社交账号配置：src/data/social.ts；Threads 仍打开个人主页，Spotify 图标用于站内封面展示。
 - Baby Blue 配色、大波点与毛玻璃卡片：src/styles/baby-blue.css；底色为 Pantone 13-4308 TCX Baby Blue（#B5C7D3），波点为 Pantone 15-3919 TCX Serenity（#92A8D1）。
 - 顶部波点背景：public/images/baby-blue-dots.svg。主题色已固定，历史浏览器配色不会覆盖新版主题；仍可切换浅色与深色模式。
 
 ## 更新线上网站
 
-将修改推送到 Cloudflare 所关联的 GitHub 生产分支。如果已启用自动部署，Cloudflare 会拉取代码并更新网站。
+将修改推送到 GitHub 的 main 分支后，还需实际发布现有 Cloudflare Worker；目前仅推送代码不会更新正式站。
 
 - 构建命令：`pnpm build`
 - 输出目录：`dist`
@@ -59,4 +61,4 @@ export const photos: FanPhoto[] = [
 
 网站默认地址已设为 `https://home.wonyoung.xyz/`，用于 RSS、站点地图和分享链接。如果 Cloudflare 中已设置 `SITE_URL` 环境变量，请将其同步为该地址。
 
-更新后检查首页、线下返图、追星手记、收藏、搜索及 RSS。现有域名解析无需因本次内容更新而修改。
+更新后检查首页、线下返图、追星手记的线下与生日分类、科研手记、Spotify 封面弹层、搜索及 RSS。现有域名解析无需因本次内容更新而修改。
