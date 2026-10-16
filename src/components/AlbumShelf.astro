@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import { albums } from "../data/albums";
+import { socialProfiles } from "../data/social";
 import { url } from "../utils/url-utils";
 ---
 
@@ -10,11 +11,17 @@ import { url } from "../utils/url-utils";
     <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
   </button>
   <dialog id="album-covers" aria-label="专辑封面" class="card-base album-dialog" data-pagefind-ignore>
-    <form method="dialog" class="flex justify-end mb-4">
-      <button aria-label="关闭专辑封面" class="btn-plain rounded-full w-10 h-10" autofocus>
-        <Icon name="material-symbols:close-rounded" class="text-2xl" />
-      </button>
-    </form>
+    <div class="flex items-center justify-between mb-4">
+      <a href={socialProfiles.spotify} target="_blank" rel="me noopener noreferrer" aria-label="访问我的 Spotify 主页" title="Spotify 个人主页"
+        class="btn-regular rounded-lg h-10 w-10 active:scale-90">
+        <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
+      </a>
+      <form method="dialog">
+        <button aria-label="关闭专辑封面" class="btn-plain rounded-full w-10 h-10" autofocus>
+          <Icon name="material-symbols:close-rounded" class="text-2xl" />
+        </button>
+      </form>
+    </div>
     <div class="album-grid">
       {albums.map(album => <img src={url(album.cover)} alt={`${album.artist} — ${album.title}`} width="480" height="480" loading="lazy" decoding="async" />)}
     </div>
