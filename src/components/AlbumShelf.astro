@@ -6,10 +6,9 @@ import { url } from "../utils/url-utils";
 ---
 
 <album-shelf>
-  <button type="button" aria-label="查看我的专辑" aria-haspopup="dialog" aria-controls="album-covers"
-    class="btn-regular spotify-trigger rounded-lg h-10 px-3 gap-2" data-spotify-trigger>
-    <Icon name="fa6-brands:spotify" class="text-[1.25rem]" />
-    <span>Spotify</span>
+  <button type="button" aria-label="查看我的专辑" title="Spotify" aria-haspopup="dialog" aria-controls="album-covers"
+    class="btn-regular rounded-lg h-10 w-10 active:scale-90" data-spotify-trigger>
+    <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
   </button>
 
   <dialog id="album-covers" aria-labelledby="album-covers-title" class="card-base album-dialog" data-pagefind-ignore>
@@ -65,7 +64,6 @@ import { url } from "../utils/url-utils";
 <style>
   album-shelf { display: contents; }
   album-shelf :is(button, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
-  .spotify-trigger { font-size: 0.875rem; font-weight: 600; }
   .album-dialog {
     width: min(640px, calc(100vw - 32px));
     max-height: calc(100dvh - 32px);

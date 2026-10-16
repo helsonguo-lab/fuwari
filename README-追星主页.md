@@ -44,10 +44,10 @@ export const photos: FanPhoto[] = [
 - 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。
 - 关于页面：src/content/spec/about.md
 - 科研手记入口：src/pages/research.astro，按 category 自动收录；旧收藏入口重定向至科研手记。
-- 专辑封面：src/data/albums.ts 与 public/images/albums/，首次点击个人资料下的 Spotify 图标打开毛玻璃封面弹层，再点击弹层左上角的 Spotify 图标，在新标签页打开个人主页；按 Esc、关闭图标或遮罩空白处关闭。
-- 社交账号配置：src/data/social.ts；Threads 直接打开个人主页，Spotify 采用上述两级入口。
-- Baby Blue 配色、大波点与毛玻璃卡片：src/styles/baby-blue.css；底色为 Pantone 13-4308 TCX Baby Blue（#B5C7D3），波点为 Pantone 15-3919 TCX Serenity（#92A8D1）。
-- 顶部波点背景：public/images/baby-blue-dots.svg。主题色已固定，历史浏览器配色不会覆盖新版主题；仍可切换浅色与深色模式。
+- 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify 与 Threads 均为 40×40 纯图标按钮；点击 Spotify 直接打开“我的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
+- 社交账号配置：src/data/social.ts；Threads 直接打开个人主页，Spotify 采用上述专辑弹层。
+- 浅蓝毛玻璃配色与背景延伸：src/styles/baby-blue.css；页面使用浅蓝白色、淡紫渐变，顶部插图底部渐隐衔接，支持深色模式。原波点样式已移除。
+- 顶部插图和欢迎文章封面：public/images/cinnamoroll-room-e1567358a55f.webp，由用户提供的 IMG_0172.JPEG 生成 1200×1200 WebP 副本；下载目录原图保持不变。主题色已固定，历史浏览器配色不会覆盖新版主题。
 
 ## 更新线上网站
 

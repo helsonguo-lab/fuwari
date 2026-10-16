@@ -1,9 +1,8 @@
-/* Pantone 13-4308 TCX Baby Blue with 15-3919 TCX Serenity dots. */
+/* Soft blue glass with the supplied illustration and a continuous pastel wash. */
 :root {
   --baby-blue: #b5c7d3;
-  --serenity-blue: #92a8d1;
   --primary: #486879;
-  --page-bg: var(--baby-blue);
+  --page-bg: #f5f9fc;
   --card-bg: #f7fbff;
   --btn-content: #405f73;
   --btn-regular-bg: #dce7ee;
@@ -22,12 +21,12 @@
   --glass-bg: rgb(247 251 255 / 68%);
   --glass-border: rgb(255 255 255 / 78%);
   --glass-shadow: 0 8px 32px rgb(64 95 115 / 7%), inset 0 1px 0 rgb(255 255 255 / 55%);
-  --dot-color: var(--serenity-blue);
+  --page-wash: linear-gradient(180deg, #edf5f9 0%, #e8f4fb 42%, #f4f0f8 76%, #f5f9fc 100%);
 }
 
 :root.dark {
   --primary: var(--baby-blue);
-  --page-bg: #101c27;
+  --page-bg: #152331;
   --card-bg: #1d2e3b;
   --btn-content: #d4e4ee;
   --btn-regular-bg: #2a4052;
@@ -46,30 +45,25 @@
   --glass-bg: rgb(29 46 59 / 78%);
   --glass-border: rgb(181 199 211 / 18%);
   --glass-shadow: 0 8px 32px rgb(0 0 0 / 12%), inset 0 1px 0 rgb(181 199 211 / 8%);
-  --dot-color: #30476a;
+  --page-wash: linear-gradient(180deg, #101c27 0%, #162837 48%, #242333 78%, #152331 100%);
 }
 
 html {
-  background-image:
-    radial-gradient(circle at 40px 40px, var(--dot-color) 28px, transparent 29px),
-    radial-gradient(circle at 120px 120px, var(--dot-color) 28px, transparent 29px);
-  background-size: 160px 160px;
-  background-attachment: fixed;
+  background-image: var(--page-wash);
+  background-size: 100% 1800px;
+  background-repeat: no-repeat;
+  background-attachment: scroll;
 }
 
 #banner {
   background-color: var(--page-bg);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 76%, transparent 100%);
 }
 
 .dark #banner img {
-  mix-blend-mode: screen;
-  opacity: 0.12;
-}
-
-/* Keep the large dots the same size across screen widths. */
-img[src="/images/baby-blue-dots.svg"] {
-  object-fit: none;
-  object-position: left top !important;
+  filter: brightness(0.62) saturate(0.8);
+  opacity: 0.85;
 }
 
 /* Release the opacity animation's backdrop root after the entrance finishes. */

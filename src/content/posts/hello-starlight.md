@@ -2,7 +2,7 @@
 title: 欢迎来到 Junnie的追星角落
 published: 2026-10-15
 description: 关于 IVE、NMIXX，和那些亲手拍下的现场记忆。
-image: /images/baby-blue-dots.svg
+image: /images/cinnamoroll-room-e1567358a55f.webp
 tags: [开站, IVE, NMIXX]
 category: 线下
 draft: false
