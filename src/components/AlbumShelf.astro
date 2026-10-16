@@ -6,16 +6,33 @@ import { url } from "../utils/url-utils";
 ---
 
 <album-shelf>
-  <button type="button" aria-label="查看专辑封面" title="Spotify" aria-haspopup="dialog" aria-controls="album-covers"
-    class="btn-regular rounded-lg h-10 w-10 active:scale-90" data-album-open>
-    <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
+  <button type="button" aria-label="Spotify 菜单" aria-expanded="false" aria-controls="spotify-options"
+    popovertarget="spotify-options" class="btn-regular spotify-trigger rounded-lg h-10 px-3 gap-2" data-spotify-trigger>
+    <Icon name="fa6-brands:spotify" class="text-[1.25rem]" />
+    <span>Spotify</span>
+    <Icon name="material-symbols:expand-more-rounded" class="spotify-chevron text-lg" />
   </button>
-  <dialog id="album-covers" aria-label="专辑封面" class="card-base album-dialog" data-pagefind-ignore>
-    <div class="flex items-center justify-between mb-4">
-      <a href={socialProfiles.spotify} target="_blank" rel="me noopener noreferrer" aria-label="访问我的 Spotify 主页" title="Spotify 个人主页"
-        class="btn-regular rounded-lg h-10 w-10 active:scale-90">
-        <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
-      </a>
+
+  <div id="spotify-options" popover="auto" role="group" aria-label="Spotify 选项"
+    class="card-base spotify-options" data-pagefind-ignore>
+    <button type="button" class="spotify-option" aria-haspopup="dialog" aria-controls="album-covers" data-album-open autofocus>
+      <span class="spotify-option-icon"><Icon name="material-symbols:library-music-rounded" class="text-2xl" /></span>
+      <span class="spotify-option-copy"><span class="spotify-option-title">我的专辑</span><span class="spotify-option-hint">{albums.length} 张喜欢的专辑</span></span>
+      <Icon name="material-symbols:chevron-right-rounded" class="text-xl" />
+    </button>
+    <a href={socialProfiles.spotify} target="_blank" rel="me noopener noreferrer" class="spotify-option" data-spotify-profile>
+      <span class="spotify-option-icon"><Icon name="fa6-brands:spotify" class="text-2xl" /></span>
+      <span class="spotify-option-copy"><span class="spotify-option-title">Spotify 主页</span><span class="spotify-option-hint">在新标签页打开</span></span>
+      <Icon name="material-symbols:open-in-new-rounded" class="text-lg" />
+    </a>
+  </div>
+
+  <dialog id="album-covers" aria-labelledby="album-covers-title" class="card-base album-dialog" data-pagefind-ignore>
+    <div class="album-heading">
+      <div>
+        <h2 id="album-covers-title">我的专辑</h2>
+        <p>{albums.length} 张喜欢的专辑</p>
+      </div>
       <form method="dialog">
         <button aria-label="关闭专辑封面" class="btn-plain rounded-full w-10 h-10" autofocus>
           <Icon name="material-symbols:close-rounded" class="text-2xl" />
@@ -25,21 +42,69 @@ import { url } from "../utils/url-utils";
     <div class="album-grid">
       {albums.map(album => <img src={url(album.cover)} alt={`${album.artist} — ${album.title}`} width="480" height="480" loading="lazy" decoding="async" />)}
     </div>
+    <a href={socialProfiles.spotify} target="_blank" rel="me noopener noreferrer" class="btn-regular album-profile rounded-lg gap-2">
+      <Icon name="fa6-brands:spotify" class="text-xl" />
+      <span>打开 Spotify 主页</span>
+      <Icon name="material-symbols:open-in-new-rounded" class="text-base" />
+    </a>
   </dialog>
 </album-shelf>
 
 <script>
   class AlbumShelf extends HTMLElement {
+    private events?: AbortController;
+
     connectedCallback() {
+      this.events?.abort();
+      this.events = new AbortController();
+      const { signal } = this.events;
+      const trigger = this.querySelector<HTMLButtonElement>("[data-spotify-trigger]");
+      const options = this.querySelector<HTMLElement>("[popover]");
       const dialog = this.querySelector("dialog");
-      this.querySelector("[data-album-open]")?.addEventListener("click", () => dialog?.showModal());
-      dialog?.addEventListener("click", event => {
+      if (!trigger || !options || !dialog) return;
+
+      const positionOptions = () => {
+        const anchor = trigger.getBoundingClientRect();
+        const width = Math.min(272, window.innerWidth - 32);
+        const height = options.offsetHeight || 168;
+        const left = Math.max(16, Math.min(anchor.left, window.innerWidth - width - 16));
+        const below = anchor.bottom + 8;
+        const top = below + height <= window.innerHeight - 16 ? below : anchor.top - height - 8;
+        options.style.left = `${left}px`;
+        options.style.top = `${Math.max(16, top)}px`;
+      };
+
+      options.addEventListener("beforetoggle", event => {
+        const open = (event as ToggleEvent).newState === "open";
+        trigger.setAttribute("aria-expanded", String(open));
+        if (open) positionOptions();
+      }, { signal });
+      options.addEventListener("toggle", () => {
+        if (options.matches(":popover-open")) positionOptions();
+      }, { signal });
+      const reposition = () => {
+        if (options.matches(":popover-open")) positionOptions();
+      };
+      window.addEventListener("resize", reposition, { signal });
+      window.addEventListener("scroll", reposition, { signal, capture: true, passive: true });
+
+      this.querySelector("[data-album-open]")?.addEventListener("click", () => {
+        options.hidePopover();
+        dialog.showModal();
+      }, { signal });
+      this.querySelector("[data-spotify-profile]")?.addEventListener("click", () => options.hidePopover(), { signal });
+      dialog.addEventListener("close", () => trigger.focus({ preventScroll: true }), { signal });
+      dialog.addEventListener("click", event => {
         if (event.target !== dialog) return;
         const box = dialog.getBoundingClientRect();
         if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) {
           dialog.close();
         }
-      });
+      }, { signal });
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
     }
   }
   if (!customElements.get("album-shelf")) customElements.define("album-shelf", AlbumShelf);
@@ -47,8 +112,39 @@ import { url } from "../utils/url-utils";
 
 <style>
   album-shelf { display: contents; }
+  album-shelf :is(button, a):focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+  .spotify-trigger { font-size: 0.875rem; font-weight: 600; }
+  .spotify-chevron { transition: transform 160ms ease; }
+  .spotify-trigger[aria-expanded="true"] .spotify-chevron { transform: rotate(180deg); }
+  .spotify-options {
+    position: fixed;
+    inset: auto;
+    width: min(272px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    color: var(--btn-content);
+    box-shadow: 0 12px 36px #20334426;
+  }
+  .spotify-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 72px;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: left;
+    transition: background-color 160ms ease;
+  }
+  .spotify-option:hover, .spotify-option:focus-visible { background: var(--btn-regular-bg-hover); }
+  .spotify-option-icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; background: var(--btn-regular-bg); }
+  .spotify-option-copy { display: grid; gap: 3px; flex: 1; }
+  .spotify-option-title { font-size: 0.9375rem; font-weight: 600; }
+  .spotify-option-hint { font-size: 0.75rem; opacity: 0.7; }
   .album-dialog {
-    width: min(680px, calc(100vw - 32px));
+    width: min(640px, calc(100vw - 32px));
     max-height: calc(100dvh - 32px);
     margin: auto;
     padding: 18px 24px 24px;
@@ -57,10 +153,17 @@ import { url } from "../utils/url-utils";
     color: var(--btn-content);
   }
   .album-dialog::backdrop { background: rgb(22 38 51 / 32%); backdrop-filter: blur(7px); }
+  .album-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .album-heading h2 { font-size: 1.125rem; font-weight: 700; }
+  .album-heading p { margin-top: 2px; font-size: 0.75rem; opacity: 0.7; }
   .album-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .album-grid img { width: 100%; aspect-ratio: 1; height: auto; border-radius: 10px; object-fit: contain; box-shadow: 0 4px 16px #2033441a; }
+  .album-profile { min-height: 44px; margin-top: 18px; font-size: 0.875rem; font-weight: 600; }
   @media (max-width: 480px) {
-    .album-dialog { padding: 12px 16px 20px; }
+    .album-dialog { padding: 12px 16px 16px; }
     .album-grid { gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spotify-chevron, .spotify-option { transition: none; }
   }
 </style>
