@@ -18,16 +18,18 @@
 
 ## 添加照片
 
-1. 把照片放进 `public/photos/`，建议使用经过压缩的 JPG 或 WebP，保留原片作为备份。
+1. 把照片放进 `public/photos/`，使用 `yymmdd_组合_地点_序号.webp` 命名，例如 `260904_IVE_Hongkong_01.webp`。同场照片加序号，下载目录中的原片保留不动。
 2. 在 `src/data/photos.ts` 中添加条目，例如：
 
 ```ts
 export const photos: FanPhoto[] = [
   {
-    src: '/photos/ive-001.webp',
+    src: '/photos/ive/260904_IVE_Hongkong_01.webp',
     group: 'IVE', // 或 NMIXX
-    alt: '为照片填写一段说明',
-    // event、date、location 均可不填；有准确资料时再添加。
+    alt: '260904_IVE_Hongkong_01',
+    date: '2026-09-04',
+    location: 'Hongkong',
+    // 日期与地点使用本人确认的信息。
   },
 ];
 ```
@@ -42,6 +44,8 @@ export const photos: FanPhoto[] = [
 - 关于页面：src/content/spec/about.md
 - 收藏链接：src/data/collection.ts
 - Spotify、Threads 个人主页链接：src/data/social.ts，填好后自动在头像简介下显示图标。
+- Baby Blue 配色、大波点与毛玻璃卡片：src/styles/baby-blue.css；底色为 Pantone 13-4308 TCX Baby Blue（#B5C7D3），波点为 Pantone 15-3919 TCX Serenity（#92A8D1）。
+- 顶部波点背景：public/images/baby-blue-dots.svg。主题色已固定，历史浏览器配色不会覆盖新版主题；仍可切换浅色与深色模式。
 
 ## 更新线上网站
 

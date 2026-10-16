@@ -1,0 +1,116 @@
+/* Pantone 13-4308 TCX Baby Blue with 15-3919 TCX Serenity dots. */
+:root {
+  --baby-blue: #b5c7d3;
+  --serenity-blue: #92a8d1;
+  --primary: #486879;
+  --page-bg: var(--baby-blue);
+  --card-bg: #f7fbff;
+  --btn-content: #405f73;
+  --btn-regular-bg: #dce7ee;
+  --btn-regular-bg-hover: #cbdbe5;
+  --btn-regular-bg-active: var(--baby-blue);
+  --btn-plain-bg-hover: #dce7ee;
+  --btn-plain-bg-active: #cbdbe5;
+  --btn-card-bg-hover: #e6eff5;
+  --btn-card-bg-active: #dce7ee;
+  --title-active: #405f73;
+  --selection-bg: #b5c7d380;
+  --link-underline: var(--baby-blue);
+  --link-hover: #dce7ee;
+  --link-active: #cbdbe5;
+  --float-panel-bg: #f3f8fc;
+  --glass-bg: rgb(247 251 255 / 68%);
+  --glass-border: rgb(255 255 255 / 78%);
+  --glass-shadow: 0 8px 32px rgb(64 95 115 / 7%), inset 0 1px 0 rgb(255 255 255 / 55%);
+  --dot-color: var(--serenity-blue);
+}
+
+:root.dark {
+  --primary: var(--baby-blue);
+  --page-bg: #101c27;
+  --card-bg: #1d2e3b;
+  --btn-content: #d4e4ee;
+  --btn-regular-bg: #2a4052;
+  --btn-regular-bg-hover: #344e63;
+  --btn-regular-bg-active: #405f73;
+  --btn-plain-bg-hover: #2a4052;
+  --btn-plain-bg-active: #344e63;
+  --btn-card-bg-hover: #2a4052;
+  --btn-card-bg-active: #344e63;
+  --title-active: #d4e4ee;
+  --selection-bg: #486879;
+  --link-underline: #486879;
+  --link-hover: #344e63;
+  --link-active: #405f73;
+  --float-panel-bg: #1d2e3b;
+  --glass-bg: rgb(29 46 59 / 78%);
+  --glass-border: rgb(181 199 211 / 18%);
+  --glass-shadow: 0 8px 32px rgb(0 0 0 / 12%), inset 0 1px 0 rgb(181 199 211 / 8%);
+  --dot-color: #30476a;
+}
+
+html {
+  background-image:
+    radial-gradient(circle at 40px 40px, var(--dot-color) 28px, transparent 29px),
+    radial-gradient(circle at 120px 120px, var(--dot-color) 28px, transparent 29px);
+  background-size: 160px 160px;
+  background-attachment: fixed;
+}
+
+#banner {
+  background-color: var(--page-bg);
+}
+
+.dark #banner img {
+  mix-blend-mode: screen;
+  opacity: 0.12;
+}
+
+/* Keep the large dots the same size across screen widths. */
+img[src="/images/baby-blue-dots.svg"] {
+  object-fit: none;
+  object-position: left top !important;
+}
+
+/* Release the opacity animation's backdrop root after the entrance finishes. */
+.onload-animation {
+  opacity: 1;
+  animation-fill-mode: backwards;
+}
+
+.card-base,
+.float-panel {
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card-base,
+  .float-panel {
+    background-color: var(--glass-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(120%);
+    backdrop-filter: blur(20px) saturate(120%);
+  }
+}
+
+#navbar > div:first-child {
+  background: transparent;
+}
+
+/* The theme's text-60 utility is absent; supply readable muted copy. */
+.text-60 {
+  color: #526b7c;
+}
+
+.dark .text-60 {
+  color: #b5c7d3;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .card-base,
+  .float-panel {
+    background-color: var(--card-bg);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

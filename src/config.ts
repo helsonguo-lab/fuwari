@@ -11,15 +11,15 @@ export const siteConfig: SiteConfig = {
 	title: "Junnie的追星角落",
 	subtitle: "IVE · NMIXX · 我的线下手记",
 	lang: "zh_CN",
-	themeColor: { hue: 300, fixed: false },
+	themeColor: { hue: 233, fixed: true },
 	banner: {
 		enable: true,
-		src: "/images/starlight.svg",
+		src: "/images/baby-blue-dots.svg",
 		position: "center",
 		credit: { enable: false, text: "" },
 	},
 	toc: { enable: true, depth: 2 },
-	favicon: [{ src: "/images/star.svg", sizes: "any" }],
+	favicon: [{ src: "/images/baby-blue-star.svg", sizes: "any" }],
 };
 export const navBarConfig: NavBarConfig = {
 	links: [

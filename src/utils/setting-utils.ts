@@ -4,7 +4,7 @@ import {
 	DEFAULT_THEME,
 	LIGHT_MODE,
 } from "@constants/constants.ts";
-import { expressiveCodeConfig } from "@/config";
+import { expressiveCodeConfig, siteConfig } from "@/config";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
 export function getDefaultHue(): number {
@@ -14,17 +14,19 @@ export function getDefaultHue(): number {
 }
 
 export function getHue(): number {
+	if (siteConfig.themeColor.fixed) return getDefaultHue();
 	const stored = localStorage.getItem("hue");
 	return stored ? Number.parseInt(stored, 10) : getDefaultHue();
 }
 
 export function setHue(hue: number): void {
-	localStorage.setItem("hue", String(hue));
+	const effectiveHue = siteConfig.themeColor.fixed ? getDefaultHue() : hue;
+	localStorage.setItem("hue", String(effectiveHue));
 	const r = document.querySelector(":root") as HTMLElement;
 	if (!r) {
 		return;
 	}
-	r.style.setProperty("--hue", String(hue));
+	r.style.setProperty("--hue", String(effectiveHue));
 }
 
 export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
