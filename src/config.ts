@@ -31,7 +31,7 @@ export const navBarConfig: NavBarConfig = {
 	],
 };
 export const profileConfig: ProfileConfig = {
-	avatar: "/images/avatar.svg",
+	avatar: "/images/avatar-19ba4ef73d94.webp",
 	name: "Junnie",
 	bio: "芙4&爻6，iz*one&ive&nmixx。",
 	links: [
