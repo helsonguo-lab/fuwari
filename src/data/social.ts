@@ -2,4 +2,5 @@
 export const socialProfiles = {
 	spotify: "https://open.spotify.com/user/31mmv575xnszsgzvz7gij5dmcdxe",
 	threads: "https://www.threads.com/@junnie0606",
+	instagram: "https://www.instagram.com/junnie0606/",
 };

@@ -53,6 +53,15 @@ export const profileConfig: ProfileConfig = {
 					},
 				]
 			: []),
+		...(socialProfiles.instagram
+			? [
+					{
+						name: "Instagram",
+						icon: "fa6-brands:instagram",
+						url: socialProfiles.instagram,
+					},
+				]
+			: []),
 	],
 };
 export const licenseConfig: LicenseConfig = {

@@ -44,8 +44,8 @@ export const photos: FanPhoto[] = [
 - 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。
 - 关于页面：src/content/spec/about.md
 - 科研手记入口：src/pages/research.astro，按 category 自动收录；旧收藏入口重定向至科研手记。
-- 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify 与 Threads 均为 40×40 纯图标按钮；点击 Spotify 直接打开“我的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
-- 社交账号配置：src/data/social.ts；Threads 直接打开个人主页，Spotify 采用上述专辑弹层。
+- 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify、Threads、Instagram 均为 40×40 纯图标按钮；点击 Spotify 直接打开“我的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
+- 社交账号配置：src/data/social.ts；Threads、Instagram 直接在新标签页打开个人主页，Spotify 采用上述专辑弹层。
 - 浅蓝毛玻璃配色与背景延伸：src/styles/baby-blue.css；页面使用浅蓝白色、淡紫渐变，顶部插图底部渐隐衔接，支持深色模式。原波点样式已移除。
 - 顶部背景：public/images/background-3600.webp，由用户提供的 background-3600.png 生成 3600×3600 WebP 副本；原图保持不变。主题色已固定，历史浏览器配色不会覆盖新版主题。
 - 首页标题为“欢迎来到Junnie的个人主页”，描述为“这里记录追星和科研日常”。原欢迎文章已删除；没有手记时首页仍显示欢迎区和团体卡片。
