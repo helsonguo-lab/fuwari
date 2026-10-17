@@ -287,8 +287,15 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   .pin-date { font-size: 9px; opacity: .66; }
 
   .map-dialog {
+    /* Explicit fixed positioning keeps the dialog centered in the visual viewport
+       on mobile, even when the page behind is scrolled far down. */
+    position: fixed;
+    inset: 0;
     width: min(560px, calc(100vw - 32px));
-    max-height: calc(100dvh - 32px);
+    height: fit-content;
+    /* svh is the smallest viewport (mobile browser bars visible); vh is the fallback. */
+    max-height: calc(100vh - 32px);
+    max-height: calc(100svh - 32px);
     margin: auto;
     padding: 20px 24px 22px;
     overflow-y: auto;
@@ -302,7 +309,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   .dialog-title { margin-top: 7px; font-size: 1.1rem; font-weight: 700; line-height: 1.45; }
   .dialog-meta { margin-top: 7px; font-size: 12px; opacity: .68; }
   .dialog-photo { margin-top: 18px; }
-  .dialog-photo img { display: block; max-width: 100%; max-height: 56dvh; width: auto; height: auto; margin: 0 auto; border-radius: 14px; box-shadow: 0 8px 24px rgb(32 51 68 / 16%); }
+  .dialog-photo img { display: block; max-width: 100%; max-height: 56vh; max-height: 56svh; width: auto; height: auto; margin: 0 auto; border-radius: 14px; box-shadow: 0 8px 24px rgb(32 51 68 / 16%); }
   .dialog-photo figcaption { margin-top: 9px; text-align: center; font-size: 11px; opacity: .62; }
   .dialog-empty { margin-top: 18px; padding: 44px 20px; border: 1px dashed color-mix(in srgb, var(--btn-content) 26%, transparent); border-radius: 14px; text-align: center; }
   .empty-star { font-size: 34px; color: var(--primary); }
@@ -330,8 +337,13 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     .pin { width: 28px; height: 38px; }
     .pin-label { display: none; }
     .geo-labels { display: none; }
-    .map-dialog { padding: 16px 18px 18px; }
+    .map-dialog {
+      width: calc(100vw - 24px);
+      max-height: calc(100vh - 24px);
+      max-height: calc(100svh - 24px);
+      padding: 16px 18px 18px;
+    }
     .dialog-title { font-size: 1rem; }
-    .dialog-photo img { max-height: 50dvh; }
+    .dialog-photo img { max-height: 46vh; max-height: 46svh; }
   }
 </style>
