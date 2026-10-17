@@ -8,7 +8,7 @@ import { url } from "../utils/url-utils";
   <p class="text-60 leading-7 mt-4 max-w-xl">这里记录追星和科研日常</p>
   <div class="flex flex-wrap gap-3 mt-6">
     <a href={url('/gallery/')} class="apple-btn apple-btn-primary">看看我的线下返图</a>
-    <a href={url('/research/')} class="apple-btn apple-btn-glass">打开科研手记</a>
+    <a href={url('/research/')} class="apple-btn apple-btn-primary">打开科研手记</a>
   </div>
 </section>
 <section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
@@ -52,38 +52,10 @@ import { url } from "../utils/url-utils";
   }
   .apple-btn-primary:hover { background-color: #0077ed; }
   .apple-btn-primary:active { background-color: #006edb; }
-  .apple-btn-glass {
-    color: var(--btn-content);
-    background-color: rgb(255 255 255 / 55%);
-    border: 1px solid rgb(255 255 255 / 65%);
-    box-shadow: 0 1px 2px rgb(54 82 101 / 8%), inset 0 1px 0 rgb(255 255 255 / 55%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
-  }
-  .apple-btn-glass:hover { background-color: rgb(255 255 255 / 75%); }
-  .apple-btn-glass:active { background-color: rgb(245 250 255 / 85%); }
   :global(.dark) .apple-btn-primary { background-color: #0a84ff; }
   :global(.dark) .apple-btn-primary:hover { background-color: #409cff; }
   :global(.dark) .apple-btn-primary:active { background-color: #0077ed; }
-  :global(.dark) .apple-btn-glass {
-    color: #eaf3fa;
-    background-color: rgb(38 58 74 / 55%);
-    border-color: rgb(214 232 244 / 18%);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 25%), inset 0 1px 0 rgb(214 232 244 / 12%);
-  }
-  :global(.dark) .apple-btn-glass:hover { background-color: rgb(48 72 91 / 65%); }
-  :global(.dark) .apple-btn-glass:active { background-color: rgb(58 84 105 / 75%); }
 
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .apple-btn-glass { background-color: var(--card-bg); }
-  }
-  @media (prefers-reduced-transparency: reduce) {
-    .apple-btn-glass {
-      background-color: var(--card-bg);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
   @media (prefers-reduced-motion: reduce) {
     .apple-btn { transition: none; }
     .apple-btn:active { transform: none; }
