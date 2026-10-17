@@ -36,6 +36,17 @@ export const photos: FanPhoto[] = [
 
 相册支持团体筛选和点击放大。尚未提供照片时显示整理中的提示。
 
+## 追星地图
+
+首页“追星地图”栏目由 `src/components/FanMap.astro` 渲染，数据在 `src/data/fan-map.ts`，使用本地绘制的东亚地图，不请求在线地图瓦片。地图轮廓为 Natural Earth 公有领域数据的简化投影，已内联为 SVG，不增加运行时依赖。
+
+- 每个场次一条 `fanMapEvents` 记录：官方巡演名、城市、场馆、日期、经纬度。
+- 想在地图弹层显示某场的一张照片时，给该场次设置 `photoEventId`，并在 `src/data/photos.ts` 给对应照片加上相同的 `eventId`。弹层取该场次的第一张照片。
+- 没有照片的场次不需要额外处理，弹层会自动显示“敬请期待”。
+- 同城场次使用 `pinOffset` 做标记避让，虚线仍指向真实场馆位置。
+- 后续新增看过的场次：直接追加记录即可。暂时不想在首页展示时设置 `showOnHome: false`；首页不会展示未来行程或占位条目。
+- 修改场次数据后重新构建即可，无需安装新的地图依赖。
+
 ## 内容修改
 
 - 名称、简介、主题色、头像、封面及社交链接：src/config.ts
@@ -48,7 +59,8 @@ export const photos: FanPhoto[] = [
 - 社交账号配置：src/data/social.ts；Threads、Instagram 直接在新标签页打开个人主页，Spotify 采用上述专辑弹层。
 - 浅蓝毛玻璃配色与背景延伸：src/styles/baby-blue.css；页面使用浅蓝白色、淡紫渐变，顶部插图底部渐隐衔接，支持深色模式。原波点样式已移除。
 - 顶部背景：public/images/background-3600.webp，由用户提供的 background-3600.png 生成 3600×3600 WebP 副本；原图保持不变。主题色已固定，历史浏览器配色不会覆盖新版主题。
-- 首页标题为“欢迎来到Junnie的个人主页”，描述为“这里记录追星和科研日常”。原欢迎文章已删除；没有手记时首页仍显示欢迎区和团体卡片。
+- 首页标题为“欢迎来到Junnie的个人主页”，描述为“这里记录追星和科研日常”。原欢迎文章已删除；没有手记时首页仍显示欢迎区、团体卡片和追星地图。
+- 追星地图：src/components/FanMap.astro 与 src/data/fan-map.ts；照片与场次通过 photos.ts 中的 eventId 关联。
 
 ## 更新线上网站
 

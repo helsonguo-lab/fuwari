@@ -1,0 +1,341 @@
+---
+import { fanMapEvents } from "../data/fan-map";
+import { photos } from "../data/photos";
+import { url } from "../utils/url-utils";
+
+const VIEW_WIDTH = 1000;
+const VIEW_HEIGHT = 700;
+const LON_MIN = 104;
+const LON_MAX = 146;
+const LAT_MIN = 16;
+const LAT_MAX = 48;
+
+const mercator = (lat: number) => {
+	const phi = (lat * Math.PI) / 180;
+	return (Math.log(Math.tan(Math.PI / 4 + phi / 2)) * 180) / Math.PI;
+};
+const mercatorMin = mercator(LAT_MIN);
+const mercatorMax = mercator(LAT_MAX);
+const project = ([lon, lat]: [number, number]) => ({
+	x: ((lon - LON_MIN) / (LON_MAX - LON_MIN)) * VIEW_WIDTH,
+	y: ((mercatorMax - mercator(lat)) / (mercatorMax - mercatorMin)) * VIEW_HEIGHT,
+});
+
+const events = fanMapEvents.filter(event => event.showOnHome !== false);
+const markers = events.map(event => {
+	const anchor = project(event.coordinates);
+	const [dx, dy] = event.pinOffset ?? [0, 0];
+	return {
+		...event,
+		anchor,
+		x: anchor.x + dx,
+		y: anchor.y + dy,
+		hasOffset: dx !== 0 || dy !== 0,
+		photo: event.photoEventId
+			? photos.find(photo => photo.eventId === event.photoEventId)
+			: undefined,
+	};
+});
+const showCount = events.reduce((total, event) => total + event.dates.length, 0);
+const cityCount = new Set(events.map(event => event.city)).size;
+const formatDate = (iso: string) => iso.replaceAll("-", ".");
+const formatDates = (dates: string[]) =>
+	dates.length > 1
+		? `${formatDate(dates[0])} – ${formatDate(dates[dates.length - 1])}`
+		: formatDate(dates[0]);
+const positionStyle = (x: number, y: number) =>
+	`left:${(x / VIEW_WIDTH) * 100}%;top:${(y / VIEW_HEIGHT) * 100}%`;
+
+const longitudeLines = [110, 115, 120, 125, 130, 135, 140, 145].map(lon => {
+	const top = project([lon, LAT_MAX]);
+	const bottom = project([lon, LAT_MIN]);
+	return { x1: top.x, y1: top.y, x2: bottom.x, y2: bottom.y };
+});
+const latitudeLines = [20, 25, 30, 35, 40, 45].map(lat => {
+	const left = project([LON_MIN, lat]);
+	const right = project([LON_MAX, lat]);
+	return { x1: left.x, y1: left.y, x2: right.x, y2: right.y };
+});
+
+// 锚点去重：同一座场馆的多场演出共用一条虚线起点。
+const anchors = [
+	...new Map(
+		markers
+			.filter(marker => marker.hasOffset)
+			.map(marker => [`${marker.anchor.x},${marker.anchor.y}`, marker.anchor]),
+	).values(),
+];
+
+const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26.8L814.8 45.1L735 119.4L703.3 134L688.2 134.3L673.3 122.3L641.3 140.4L637.6 148.5L634.3 144.2L634.1 131.7L646.3 131.1L649.7 101.6L643.5 79.8L663.9 70.7L692.8 75.3L708.8 50.1L717 21.2L726.2 11.4L732 0L689.8 0L678.7 5.7L642.6 5.7L640.4 0ZM919.4 0L918.1 3.7L941.3 31.1L940.6 49.5L922.6 33.7L907 54L902.5 32L905.2 5.9L904.7 0Z" />
+<path class="land" data-country="Thailand" d="M0 700L0 658.4L17.1 673L18.6 691.7L28.3 700Z" />
+<path class="land" data-country="Laos" d="M28.3 700L18.6 691.7L17.1 673L0 658.4L0 609.1L10.4 609.1L19.6 626L4.4 631L0 635.4L0 638.9L26.1 649.4L60.9 688.6L76.5 700Z" />
+<path class="land" data-country="Vietnam" d="M76.5 700L60.9 688.6L26.1 649.4L0 638.9L0 635.4L4.4 631L19.6 626L10.4 609.1L0 609.1L0 570.1L11.4 568.9L31.6 558.5L43.1 565.8L64.9 569.4L61.1 580.7L72.5 588.7L96.4 593.7L64.6 610.3L44.8 628.6L39.6 641.9L80 686.8L103.1 700Z" />
+<path class="land" data-country="North Korea" d="M634.3 144.2L637.6 148.5L628.6 147.1L618.2 155.3L611.1 163.6L612 180.9L599.7 186.2L586.5 197.4L570.7 201.3L560.3 207.6L559.6 217.8L556.8 220.4L566.3 224.2L579.8 234.4L576.3 240L549.4 242.6L540.1 253L529.5 252.2L528 254.3L516.4 249.9L513.5 254.2L506.6 256.1L505.7 251.8L493.1 246L499.7 235.9L505.3 233.2L503.2 228.9L509.2 216.3L507.6 212.5L493.7 209.9L482.5 203.6L501.9 188.4L528.1 175.5L544.5 158.4L555.8 166L576.4 166.8L572.7 154L609.4 143.5L618.9 129.7Z" />
+<path class="land" data-country="South Korea" d="M528 254.3L529.5 252.2L540.1 253L549.4 242.6L576.3 240L579.8 234.4L600.3 261.5L606.2 276.2L606.4 302.1L597.4 314.3L575.9 318.6L556.8 327.7L535.4 329.6L532.7 317.6L537.1 300.9L526.6 277.6L544.3 273.8Z" />
+<path class="land" data-country="Mongolia" d="M0 0L275.5 0L279.6 7.4L293.1 4L316.6 8.2L331.5 0L338.9 0L354 6.8L375.5 25.5L372.9 35L354.2 32L319.6 35.5L302.8 43L285.4 60.2L249.1 70.2L225.3 83.9L187.5 76.4L175 92.8L182.6 102.5L186.4 110.8L169.8 119.2L152.7 132.5L124.8 141.2L89.2 142.1L50.7 150.6L23 163.7L12.4 156.1L0 156.1Z" />
+<path class="land" data-country="China" d="M130.4 658.3L110.8 652.4L110.1 636L121.9 627.2L147.9 621.8L161.6 622.3L166.9 629.7L156.4 638.1L150.9 649.2ZM0 156.1L12.4 156.1L23 163.7L50.7 150.6L89.2 142.1L124.8 141.2L152.7 132.5L169.8 119.2L186.4 110.8L182.6 102.5L175 92.8L187.5 76.4L225.3 83.9L249.1 70.2L285.4 60.2L302.8 43L319.6 35.5L354.2 32L372.9 35L375.5 25.5L354 6.8L338.9 0L331.5 0L316.6 8.2L293.1 4L279.6 7.4L275.5 0L640.4 0L642.6 5.7L678.7 5.7L689.8 0L732 0L726.2 11.4L717 21.2L708.8 50.1L692.8 75.3L663.9 70.7L643.5 79.8L649.7 101.6L646.3 131.1L634.1 131.7L634.3 144.2L618.9 129.7L609.4 143.5L572.7 154L576.4 166.8L555.8 166L544.5 158.4L528.1 175.5L501.9 188.4L482.5 203.6L449.2 210.5L431.7 221.4L406.1 227.8L418.7 217L413.7 207.8L432.6 191.9L420 179.4L399.3 187.8L372.4 204.3L357.7 219.5L334.4 220.6L322.2 231.5L334.8 247.1L354.2 250.9L355 261.2L373.9 267.8L400.6 251.5L421.7 260.4L437.1 261L441 272.9L407.2 279.2L396.1 291.4L373 302.6L360.7 318.1L386.4 330.2L395.7 351.7L410.2 371.5L426.4 387.9L426 403.6L411.1 409.4L416.8 420.6L430.8 427.1L427.1 444L421.1 460.4L407.8 462.2L371.1 510.9L349 534.8L316.2 553.1L283.1 569.7L256.3 571.9L241.7 580.6L233.5 574.3L220 584L186.8 593.8L161.6 596.7L153.4 617.2L140.2 618.4L134 604.3L139.6 596.8L107.7 590.6L96.4 593.7L72.5 588.7L61.1 580.7L64.9 569.4L43.1 565.8L31.6 558.5L11.4 568.9L0 570.1Z" />
+<path class="land" data-country="Taiwan" d="M423.3 537.8L408.9 569.5L398.7 585.6L386.2 569L383.5 554.4L397.5 534.9L416.5 519.8L427.4 525.8Z" />
+<path class="land" data-country="Philippines" d="M436.6 657.8L432.7 665.7L440.8 679.3L434.6 695.1L423.5 700L378.5 700L378.2 693.1L387.8 699.3L390.2 669.7L398 652.5L412.4 652.5L427.1 658L434.4 653Z" />
+<path class="land" data-country="Japan" d="M902 221.2L880 244.5L880.4 268.1L871.4 286.2L875.6 297.4L863.2 313.1L832.8 323.5L790.9 324.8L757 349.8L741 341.4L740 325L698.6 329.9L670.4 340.2L642.5 340.6L666.7 356.6L650.8 393L635.4 401.9L623.9 393.7L629.7 374.5L614.6 368.2L605 353.4L627.5 346.7L640 333L663.9 321.7L681.4 306.5L728.8 299.9L754.2 304.4L779.1 264.4L795 275.3L843.5 243.6L858.4 215.1L854.4 188.5L864.4 173.4L889.7 169L902.7 202.1ZM967 105.3L983.8 94.6L989.1 122.8L953.8 129.6L932.9 154L895.5 137.3L882.6 164L856.1 164.4L852.8 140.1L864.6 121.1L890 119.7L897 84.8L904 64.8L932 91.5L950.2 100ZM675.5 349.8L688.7 336.8L702.2 339.3L712 330.1L729.5 334.9L732.5 342.3L719.1 355.5L709.4 348.5L697.1 353.6L690.8 366.2L675.3 360.1Z" />`;
+---
+
+<fan-map>
+  <section class="card-base p-6 md:p-9 mb-4" aria-labelledby="fan-map-title">
+    <div class="map-head">
+      <div>
+        <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">MY STARRY MAP ✦</p>
+        <h2 id="fan-map-title" class="text-2xl md:text-3xl font-bold text-90">追星地图</h2>
+        <p class="text-60 leading-7 mt-3 max-w-xl">从东京巨蛋到香港亚博，把每一次见面钉在地图上。点击标记，翻开那天的照片。</p>
+      </div>
+      <div class="map-side">
+        <p class="map-stats" aria-label={`${showCount} 场演出，${cityCount} 座城市`}>
+          <span><strong>{showCount}</strong> 场演出</span>
+          <span class="stats-divider" aria-hidden="true"></span>
+          <span><strong>{cityCount}</strong> 座城市</span>
+        </p>
+        <p class="map-legend" aria-hidden="true">
+          <span><i class="legend-dot ive"></i>IVE</span>
+          <span><i class="legend-dot nmixx"></i>NMIXX</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="map-frame">
+      <svg class="map-svg" viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`} role="img" aria-labelledby="fan-map-svg-title fan-map-svg-desc" preserveAspectRatio="xMidYMid meet">
+        <title id="fan-map-svg-title">Junnie 的东亚追星地图</title>
+        <desc id="fan-map-svg-desc">东亚地图，标出东京、仁川、澳门和香港的 {markers.length} 个已看场次，点击地图上的标记可以查看场次照片。</desc>
+        <g class="graticule" aria-hidden="true">
+          {longitudeLines.map(line => <line {...line} />)}
+          {latitudeLines.map(line => <line {...line} />)}
+        </g>
+        <g class="landmass" aria-hidden="true"><Fragment set:html={landPaths} /></g>
+        <g class="geo-labels" aria-hidden="true">
+          <text x="205" y="405">中国</text>
+          <text x="790" y="388">日本</text>
+          <text x="558" y="352">韩国</text>
+          <text x="407" y="508">台湾</text>
+          <text x="408" y="638">菲律宾</text>
+        </g>
+        <g class="leaders" aria-hidden="true">
+          {markers.filter(marker => marker.hasOffset).map(marker => (
+            <line x1={marker.anchor.x} y1={marker.anchor.y} x2={marker.x} y2={marker.y} />
+          ))}
+          {anchors.map(anchor => <circle cx={anchor.x} cy={anchor.y} r="3.2" class="anchor-dot" />)}
+        </g>
+      </svg>
+
+      {markers.map(marker => (
+        <button
+          type="button"
+          class:list={["pin", `pin-${marker.group.toLowerCase()}`]}
+          style={positionStyle(marker.x, marker.y)}
+          aria-haspopup="dialog"
+          aria-controls={`fan-map-dialog-${marker.id}`}
+          aria-label={`${marker.group}，${marker.venue}，${formatDates(marker.dates)}${marker.photo ? "，查看现场照片" : "，照片敬请期待"}`}
+        >
+          <svg viewBox="0 0 34 46" class="pin-shape" aria-hidden="true">
+            <path class="pin-body" d="M17 0C7.6 0 0 7.6 0 17c0 12.9 17 29 17 29s17-16.1 17-29C34 7.6 26.4 0 17 0Z" />
+            <circle cx="17" cy="16.5" r="6.3" fill="white" opacity=".94" />
+            <circle cx="17" cy="16.5" r="2.2" class="pin-dot" />
+          </svg>
+          <span class="pin-label">
+            <span class="pin-city">{marker.city}</span>
+            <span class="pin-date">{formatDates(marker.dates)}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+
+    <p class="map-hint text-60 text-xs mt-3">点击标记查看场次 · 同城场次以虚线指向真实场馆 · 暂无照片的场次显示“敬请期待”</p>
+  </section>
+
+  {markers.map(marker => (
+    <dialog id={`fan-map-dialog-${marker.id}`} class="card-base map-dialog" aria-labelledby={`fan-map-dialog-title-${marker.id}`} data-pagefind-ignore>
+      <div class="dialog-head">
+        <div>
+          <p class="dialog-kicker"><i class:list={["legend-dot", marker.group.toLowerCase()]} aria-hidden="true"></i>{marker.group} · {marker.city}</p>
+          <h3 id={`fan-map-dialog-title-${marker.id}`} class="dialog-title">{marker.tour}</h3>
+          <p class="dialog-meta">{formatDates(marker.dates)} · {marker.venue}</p>
+        </div>
+        <form method="dialog">
+          <button aria-label="关闭场次详情" class="btn-plain rounded-full w-10 h-10 shrink-0" autofocus>
+            <svg viewBox="0 0 24 24" class="w-6 h-6 mx-auto" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        </form>
+      </div>
+
+      {marker.photo ? (
+        <figure class="dialog-photo">
+          <img src={url(marker.photo.src)} alt={`${marker.group} ${marker.venue} ${formatDates(marker.dates)} 现场照片`} width={marker.photo.width} height={marker.photo.height} loading="lazy" decoding="async" />
+          <figcaption>{[marker.group, formatDates(marker.dates), marker.venue].join(" · ")}</figcaption>
+        </figure>
+      ) : (
+        <div class="dialog-empty">
+          <span class="empty-star" aria-hidden="true">✧</span>
+          <p class="empty-title">敬请期待</p>
+          <p class="empty-copy">这一场的照片还在路上，先在地图上留个位置。</p>
+        </div>
+      )}
+
+      <div class="dialog-foot">
+        <span>{marker.shortName}</span>
+        {marker.photo && <a href={url("/gallery/")} class="btn-plain rounded-lg px-4 py-2 text-xs font-bold">去线下返图看更多 ↗</a>}
+      </div>
+    </dialog>
+  ))}
+</fan-map>
+
+<script>
+  class FanMap extends HTMLElement {
+    private events?: AbortController;
+
+    connectedCallback() {
+      this.events?.abort();
+      this.events = new AbortController();
+      const { signal } = this.events;
+
+      this.querySelectorAll<HTMLButtonElement>("button.pin").forEach(trigger => {
+        const dialog = this.querySelector<HTMLDialogElement>(`#${trigger.getAttribute("aria-controls")}`);
+        if (!dialog) return;
+
+        trigger.addEventListener("click", () => dialog.showModal(), { signal });
+        dialog.addEventListener("close", () => trigger.focus({ preventScroll: true }), { signal });
+        dialog.addEventListener("click", event => {
+          if (event.target !== dialog) return;
+          const box = dialog.getBoundingClientRect();
+          if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) {
+            dialog.close();
+          }
+        }, { signal });
+      });
+    }
+
+    disconnectedCallback() {
+      this.events?.abort();
+    }
+  }
+  if (!customElements.get("fan-map")) customElements.define("fan-map", FanMap);
+</script>
+
+<style>
+  fan-map { display: block; }
+  .map-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .map-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .map-stats { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--btn-content); font-size: 12px; }
+  .map-stats strong { font-size: 17px; line-height: 1; color: var(--primary); }
+  .stats-divider { width: 1px; height: 16px; background: color-mix(in srgb, var(--btn-content) 22%, transparent); }
+  .map-legend { display: flex; gap: 14px; font-size: 11px; color: var(--btn-content); letter-spacing: .05em; }
+  .map-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; flex: none; }
+  .legend-dot.ive { background: #dc6f9f; }
+  .legend-dot.nmixx { background: #5a86b4; }
+
+  .map-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1000 / 700;
+    margin-top: 22px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
+    background: linear-gradient(155deg, #e9f6fd 0%, #d8ecf7 52%, #e9f3fb 100%);
+  }
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .graticule line { stroke: #a9cadd; stroke-width: 1; stroke-dasharray: 2 5; opacity: .5; vector-effect: non-scaling-stroke; }
+  :global(.land) { fill: #fbfdff; stroke: #bed9e8; stroke-width: 1.1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  .geo-labels text { fill: #7597ab; font-size: 13px; letter-spacing: .28em; opacity: .8; }
+  .leaders line { stroke: #8ba9bd; stroke-width: 1.1; stroke-dasharray: 3 4; opacity: .72; vector-effect: non-scaling-stroke; }
+  .anchor-dot { fill: #7f9db2; opacity: .85; }
+
+  .pin {
+    position: absolute;
+    width: 34px;
+    height: 46px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    z-index: 2;
+    transition: transform .18s ease, filter .18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pin:hover { transform: translate(-50%, -100%) translateY(-3px); }
+  .pin:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 8px; }
+  .pin-shape { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 7px rgb(42 68 89 / 22%)); }
+  .pin-ive { --pin-color: #dc6f9f; --pin-dot: #b44f7c; }
+  .pin-nmixx { --pin-color: #5a86b4; --pin-dot: #3f678f; }
+  .pin-body { fill: var(--pin-color); }
+  .pin-dot { fill: var(--pin-dot); }
+  .pin-label {
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: var(--glass-bg);
+    box-shadow: 0 4px 12px rgb(64 95 115 / 12%);
+    color: var(--btn-content);
+    white-space: nowrap;
+    line-height: 1.2;
+    backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  .pin-city { font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+  .pin-date { font-size: 9px; opacity: .66; }
+
+  .map-dialog {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    margin: auto;
+    padding: 20px 24px 22px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background-color: color-mix(in srgb, var(--card-bg) 94%, transparent);
+    color: var(--btn-content);
+  }
+  .map-dialog::backdrop { background: rgb(22 38 51 / 32%); backdrop-filter: blur(7px); }
+  .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .dialog-kicker { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .14em; opacity: .72; }
+  .dialog-title { margin-top: 7px; font-size: 1.1rem; font-weight: 700; line-height: 1.45; }
+  .dialog-meta { margin-top: 7px; font-size: 12px; opacity: .68; }
+  .dialog-photo { margin-top: 18px; }
+  .dialog-photo img { display: block; max-width: 100%; max-height: 56dvh; width: auto; height: auto; margin: 0 auto; border-radius: 14px; box-shadow: 0 8px 24px rgb(32 51 68 / 16%); }
+  .dialog-photo figcaption { margin-top: 9px; text-align: center; font-size: 11px; opacity: .62; }
+  .dialog-empty { margin-top: 18px; padding: 44px 20px; border: 1px dashed color-mix(in srgb, var(--btn-content) 26%, transparent); border-radius: 14px; text-align: center; }
+  .empty-star { font-size: 34px; color: var(--primary); }
+  .empty-title { margin-top: 8px; font-size: 17px; font-weight: 700; }
+  .empty-copy { margin-top: 6px; font-size: 12px; opacity: .66; }
+  .dialog-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--btn-content) 14%, transparent); font-size: 11px; letter-spacing: .04em; opacity: .78; }
+  .dialog-foot a { opacity: 1; }
+
+  :global(.dark) .map-frame { background: linear-gradient(155deg, #142634 0%, #10202c 50%, #172432 100%); border-color: rgb(181 199 211 / 16%); }
+  :global(.dark) .graticule line { stroke: #355063; opacity: .5; }
+  :global(.dark) :global(.land) { fill: #223544; stroke: #355064; }
+  :global(.dark) .geo-labels text { fill: #7f9db2; opacity: .55; }
+  :global(.dark) .leaders line { stroke: #6f8da2; }
+  :global(.dark) .anchor-dot { fill: #8ca9bc; }
+  :global(.dark) .pin-ive { --pin-color: #eb92b7; --pin-dot: #c8658f; }
+  :global(.dark) .pin-nmixx { --pin-color: #86aed4; --pin-dot: #5d86ab; }
+  :global(.dark) .pin-label { background: rgb(29 46 59 / 82%); }
+
+  @media (max-width: 639px) {
+    .map-head { align-items: flex-start; }
+    .map-side { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+    .map-stats { padding: 5px 12px; font-size: 11px; }
+    .map-stats strong { font-size: 15px; }
+    .map-frame { margin-top: 16px; border-radius: 16px; }
+    .pin { width: 28px; height: 38px; }
+    .pin-label { display: none; }
+    .geo-labels { display: none; }
+    .map-hint { line-height: 1.7; }
+    .map-dialog { padding: 16px 18px 18px; }
+    .dialog-title { font-size: 1rem; }
+    .dialog-photo img { max-height: 50dvh; }
+  }
+</style>

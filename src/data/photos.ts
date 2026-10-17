@@ -3,6 +3,8 @@ export type FanPhoto = {
 	group: "IVE" | "NMIXX";
 	alt: string;
 	event?: string;
+	/** 对应 src/data/fan-map.ts 中的场次 id，用于首页追星地图。 */
+	eventId?: string;
 	date?: string;
 	location?: string;
 	width?: number;
@@ -16,6 +18,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/ive/260904_IVE_Hongkong_01.webp",
 		group: "IVE",
 		alt: "260904_IVE_Hongkong_01",
+		eventId: "ive-hk-2026",
 		date: "2026-09-04",
 		location: "Hongkong",
 		width: 1688,
@@ -25,6 +28,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/ive/260904_IVE_Hongkong_02.webp",
 		group: "IVE",
 		alt: "260904_IVE_Hongkong_02",
+		eventId: "ive-hk-2026",
 		date: "2026-09-04",
 		location: "Hongkong",
 		width: 1688,
@@ -34,6 +38,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/ive/260904_IVE_Hongkong_03.webp",
 		group: "IVE",
 		alt: "260904_IVE_Hongkong_03",
+		eventId: "ive-hk-2026",
 		date: "2026-09-04",
 		location: "Hongkong",
 		width: 1688,
@@ -43,6 +48,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/ive/260904_IVE_Hongkong_04.webp",
 		group: "IVE",
 		alt: "260904_IVE_Hongkong_04",
+		eventId: "ive-hk-2026",
 		date: "2026-09-04",
 		location: "Hongkong",
 		width: 1688,
@@ -52,6 +58,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/nmixx/260726_NMIXX_Hongkong_01.webp",
 		group: "NMIXX",
 		alt: "260726_NMIXX_Hongkong_01",
+		eventId: "nmixx-hk-2026",
 		date: "2026-07-26",
 		location: "Hongkong",
 		width: 1440,
@@ -61,6 +68,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/nmixx/260725_NMIXX_Hongkong_02.webp",
 		group: "NMIXX",
 		alt: "260725_NMIXX_Hongkong_02",
+		eventId: "nmixx-hk-2026",
 		date: "2026-07-25",
 		location: "Hongkong",
 		width: 1366,
@@ -70,6 +78,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/nmixx/260725_NMIXX_Hongkong_03.webp",
 		group: "NMIXX",
 		alt: "260725_NMIXX_Hongkong_03",
+		eventId: "nmixx-hk-2026",
 		date: "2026-07-25",
 		location: "Hongkong",
 		width: 1502,
@@ -79,6 +88,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/nmixx/260726_NMIXX_Hongkong_04.webp",
 		group: "NMIXX",
 		alt: "260726_NMIXX_Hongkong_04",
+		eventId: "nmixx-hk-2026",
 		date: "2026-07-26",
 		location: "Hongkong",
 		width: 2160,
@@ -88,6 +98,7 @@ export const photos: FanPhoto[] = [
 		src: "/photos/nmixx/260726_NMIXX_Hongkong_05.webp",
 		group: "NMIXX",
 		alt: "260726_NMIXX_Hongkong_05",
+		eventId: "nmixx-hk-2026",
 		date: "2026-07-26",
 		location: "Hongkong",
 		width: 3000,
