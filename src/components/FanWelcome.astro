@@ -3,7 +3,7 @@ import { photos } from "../data/photos";
 import { url } from "../utils/url-utils";
 ---
 <section class="card-base p-7 md:p-9 mb-4 relative overflow-hidden">
-  <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">JUNNIE’S FAN JOURNAL ✦</p>
+  <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">JUNNIE’S JOURNAL ✦</p>
   <h1 class="text-3xl md:text-4xl font-bold text-90 leading-snug">欢迎来到Junnie的个人主页</h1>
   <p class="text-60 leading-7 mt-4 max-w-xl">这里记录追星和科研日常</p>
   <div class="flex flex-wrap gap-3 mt-6">
@@ -12,7 +12,7 @@ import { url } from "../utils/url-utils";
   </div>
 </section>
 <section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
-  {[{ name: 'IVE', fandom: 'DIVE', note: '每一次相遇，都是心动的延续。', tone: 'ive' }, { name: 'NMIXX', fandom: 'NSWER', note: '把舞台的能量，带回日常里。', tone: 'nmixx' }].map(group => (
+  {[{ name: 'IVE', fandom: 'DIVE', note: '喜欢小圆的第7年', tone: 'ive' }, { name: 'NMIXX', fandom: 'NSWER', note: '220222接生的小啾', tone: 'nmixx' }].map(group => (
     <a href={url('/gallery/') + '?group=' + group.name} class:list={['group-card card-base p-7', group.tone]}>
       <p class="text-xs tracking-[.2em] opacity-70">{group.fandom} ♡</p>
       <h2 class="text-3xl font-bold mt-2 tracking-wide">{group.name} <span class="text-lg float-right" aria-hidden="true">↗</span></h2>

@@ -85,7 +85,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
       <div>
         <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">MY STARRY MAP ✦</p>
         <h2 id="fan-map-title" class="text-2xl md:text-3xl font-bold text-90">追星地图</h2>
-        <p class="text-60 leading-7 mt-3 max-w-xl">从东京巨蛋到香港亚博，把每一次见面钉在地图上。点击标记，翻开那天的照片。</p>
+        <p class="text-60 leading-7 mt-3 max-w-xl">与你们的记忆</p>
       </div>
       <div class="map-side">
         <p class="map-stats" aria-label={`${showCount} 场演出，${cityCount} 座城市`}>
@@ -113,8 +113,6 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
           <text x="205" y="405">中国</text>
           <text x="790" y="388">日本</text>
           <text x="558" y="352">韩国</text>
-          <text x="407" y="508">台湾</text>
-          <text x="408" y="638">菲律宾</text>
         </g>
         <g class="leaders" aria-hidden="true">
           {markers.filter(marker => marker.hasOffset).map(marker => (
@@ -146,7 +144,6 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
       ))}
     </div>
 
-    <p class="map-hint text-60 text-xs mt-3">点击标记查看场次 · 同城场次以虚线指向真实场馆 · 暂无照片的场次显示“敬请期待”</p>
   </section>
 
   {markers.map(marker => (
@@ -333,7 +330,6 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     .pin { width: 28px; height: 38px; }
     .pin-label { display: none; }
     .geo-labels { display: none; }
-    .map-hint { line-height: 1.7; }
     .map-dialog { padding: 16px 18px 18px; }
     .dialog-title { font-size: 1rem; }
     .dialog-photo img { max-height: 50dvh; }
