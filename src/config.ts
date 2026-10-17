@@ -14,7 +14,7 @@ export const siteConfig: SiteConfig = {
 	themeColor: { hue: 233, fixed: true },
 	banner: {
 		enable: true,
-		src: "/images/cinnamoroll-room-e1567358a55f.webp",
+		src: "/images/background-3600.webp",
 		position: "center",
 		credit: { enable: false, text: "" },
 	},
