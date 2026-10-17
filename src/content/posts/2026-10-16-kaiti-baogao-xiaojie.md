@@ -2,7 +2,7 @@
 title: 开题报告小结
 published: 2026-10-16
 description: 开题顺利拿到高分，也记下失眠、AI 辅助科研和效率工具带来的一点变化。
-tags: []
+tags: [阶段性记录]
 category: 科研手记
 draft: false
 ---
