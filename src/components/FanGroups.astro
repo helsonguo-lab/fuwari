@@ -1,0 +1,23 @@
+---
+import { photos } from "../data/photos";
+import { url } from "../utils/url-utils";
+---
+<section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
+  {[{ name: 'IVE', fandom: 'DIVE', note: '喜欢小圆的第7年', tone: 'ive' }, { name: 'NMIXX', fandom: 'NSWER', note: '220222接生的小啾', tone: 'nmixx' }].map(group => (
+    <a href={url('/gallery/') + '?group=' + group.name} class:list={['group-card card-base p-7', group.tone]}>
+      <p class="text-xs tracking-[.2em] opacity-70">{group.fandom} ♡</p>
+      <h2 class="text-3xl font-bold mt-2 tracking-wide">{group.name} <span class="text-lg float-right" aria-hidden="true">↗</span></h2>
+      <p class="text-sm mt-3 opacity-80">{group.note}</p>
+      <p class="text-xs mt-5 opacity-60">{photos.some(photo => photo.group === group.name) ? photos.filter(photo => photo.group === group.name).length + ' 张现场记忆' : '现场照片 · 整理中'}</p>
+    </a>
+  ))}
+</section>
+<style>
+  .group-card { transition: transform .2s, box-shadow .2s; }
+  .group-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px #4868791a; }
+  .ive { background: linear-gradient(120deg, #f7bfd7bf, #fff0f6bf); color: #83445e; }
+  .nmixx { background: linear-gradient(120deg, #f7fbff99, #b5c7d380); color: #405f73; }
+  :global(.dark) .ive { background: linear-gradient(120deg, #73435999, #382631b3); color: #f6d7e5; }
+  :global(.dark) .nmixx { background: linear-gradient(120deg, #1d2e3bb3, #344e6380); color: #d4e4ee; }
+  @media (prefers-reduced-motion: reduce) { .group-card { transition: none; } .group-card:hover { transform: none; } }
+</style>

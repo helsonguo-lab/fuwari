@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { url } from "../utils/url-utils";
+interface Props { now?: CollectionEntry<"homepage">["data"]; }
+const { now } = Astro.props;
+---
+{now && <section class="card-base now-note mb-4" aria-labelledby="now-title" data-pagefind-ignore>
+  <header>
+    <h2 id="now-title" class="text-90">Junnie 最近在……</h2>
+    <time class="text-50" datetime={now.updated}>{now.updated?.replaceAll('-', '.')}</time>
+  </header>
+  <div class="now-rows text-75">
+    {now.music && <div class="now-row">
+      <span class="now-label text-50">最近在听</span>
+      <img class="music-cover" src={url(now.music.cover)} alt={`${now.music.title} 专辑封面`} width="52" height="52" loading="lazy" decoding="async" />
+      <div class="now-copy"><p class="now-name">{now.music.title}{now.music.artist && <span class="now-artist text-50"> · {now.music.artist}</span>}</p>
+        {now.music.note && <p class="now-detail text-50">{now.music.note}</p>}
+      </div>
+    </div>}
+    {now.reading && <div class="now-row">
+      <span class="now-label text-50">最近在看</span>
+      <div class="reading-cover"><img src={url(now.reading.cover)} alt={`${now.reading.title} ${now.reading.type}封面`} loading="lazy" decoding="async" /></div>
+      <div class="now-copy"><p class="now-name">{now.reading.title}</p>
+        {now.reading.note && <p class="now-detail text-50">{now.reading.note}</p>}
+      </div>
+    </div>}
+    {now.thought && <div class="now-row now-thought"><span class="now-label text-50">最近在想</span><p>{now.thought}</p></div>}
+  </div>
+</section>}
+<style>
+  .now-note { padding: 1.25rem 1.75rem; }
+  header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .4rem 1rem; margin-bottom: 1rem; }
+  h2 { font-size: 1rem; font-weight: 600; }
+  time { font-size: .6875rem; font-variant-numeric: tabular-nums; }
+  .now-rows { display: grid; gap: .875rem; }
+  .now-row { display: grid; grid-template-columns: 4.5rem 52px minmax(0, 1fr); align-items: center; gap: .75rem; font-size: .875rem; }
+  .now-label { font-size: .75rem; }
+  .music-cover { width: 52px; height: 52px; object-fit: contain; border-radius: 5px; }
+  .reading-cover { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; }
+  .reading-cover img { max-width: 52px; max-height: 52px; width: auto; height: auto; border-radius: 3px; }
+  .now-copy, .now-thought p { min-width: 0; overflow-wrap: anywhere; }
+  .now-name { font-weight: 500; }
+  .now-artist, .now-detail { font-size: .75rem; font-weight: 400; }
+  .now-detail { margin-top: .2rem; }
+  .now-thought p { grid-column: 2 / -1; line-height: 1.7; }
+  @media (max-width: 480px) { .now-note { padding: 1.1rem 1.25rem; } .now-row { grid-template-columns: 3.75rem 44px minmax(0, 1fr); gap: .5rem; } .music-cover, .reading-cover { width: 44px; height: 44px; } .reading-cover img { max-width: 44px; max-height: 44px; } }
+</style>

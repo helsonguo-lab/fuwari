@@ -3,10 +3,13 @@ import type { GetStaticPaths } from "astro";
 import Pagination from "../components/control/Pagination.astro";
 import FanMap from "../components/FanMap.astro";
 import FanWelcome from "../components/FanWelcome.astro";
+import FanGroups from "../components/FanGroups.astro";
+import HomepageNow from "../components/HomepageNow.astro";
 import PostPage from "../components/PostPage.astro";
 import { PAGE_SIZE } from "../constants/constants";
 import MainGridLayout from "../layouts/MainGridLayout.astro";
 import { getSortedPosts } from "../utils/content-utils";
+import { getHomepageContent } from "../utils/homepage-content";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const allBlogPosts = await getSortedPosts();
@@ -17,10 +20,15 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 
 const len = page.data.length;
+const home = page.currentPage === 1 ? await getHomepageContent() : undefined;
 ---
 
 <MainGridLayout>
-    {page.currentPage === 1 && <FanWelcome />}
+    {home && <>
+        <FanWelcome memories={home.memories} />
+        <HomepageNow now={home.now} />
+        <FanGroups />
+    </>}
     {page.currentPage === 1 && <FanMap />}
     {len > 0 && <>
         <PostPage page={page}></PostPage>

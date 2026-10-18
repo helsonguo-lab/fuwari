@@ -1,4 +1,5 @@
 import { defineCollection, z } from "astro:content";
+import { homepageSchema, memorySchema } from "../utils/homepage-schema";
 
 const postsCollection = defineCollection({
 	schema: z.object({
@@ -25,4 +26,6 @@ const specCollection = defineCollection({
 export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
+	homepage: defineCollection({ schema: homepageSchema }),
+	memories: defineCollection({ schema: memorySchema }),
 };
