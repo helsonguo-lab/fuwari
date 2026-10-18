@@ -60,7 +60,7 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 		return;
 	}
 
-	if (!initialized) {
+	if (!initialized || (import.meta.env.PROD && !pagefindLoaded)) {
 		return;
 	}
 
@@ -101,7 +101,6 @@ onMount(() => {
 	const events = new AbortController();
 	let fallback: ReturnType<typeof setTimeout> | undefined;
 	const initializeSearch = () => {
-		if (initialized) return;
 		initialized = true;
 		pagefindLoaded =
 			typeof window !== "undefined" &&
@@ -142,7 +141,7 @@ onMount(() => {
 	};
 });
 
-$: if (initialized) {
+$: if (initialized && (pagefindLoaded || import.meta.env.DEV)) {
 	void search(isDesktopSearch ? keywordDesktop : keywordMobile, isDesktopSearch);
 }
 </script>
