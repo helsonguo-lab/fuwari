@@ -3,3 +3,7 @@ allowBuilds:
   esbuild: true
   sharp: true
   swup: true
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+overrides:
+  'vite>rollup': 4.64.7

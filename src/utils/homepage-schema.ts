@@ -5,6 +5,7 @@ const blankToUndefined = (value: unknown) => value == null ? undefined : typeof 
 const optionalText = z.preprocess(blankToUndefined, z.string().optional());
 const text = z.string().trim().min(1, "请填写非空文字");
 const localImage = text.refine(
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: URL control characters must be rejected at this security boundary.
 	(value) => /^\/(photos|images)\/[^%?#\\\u0000-\u0020]+$/.test(value) && !value.slice(1).split("/").some((part) => part === "." || part === ".." || !part),
 	"图片须使用 public 下的 /photos/ 或 /images/ 本地路径",
 );
