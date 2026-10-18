@@ -5,11 +5,13 @@ draft: true
 #   title: "用户填写的歌名"
 #   artist: "可选歌手"
 #   cover: "/images/now/已准备的封面.webp"
+#   spotify: "" # 可选：Spotify 歌曲分享链接，https://open.spotify.com/track/…
 #   note: "可选感受"
 # reading:
 #   type: "漫画" # 漫画 / 书籍 / 电影
 #   title: "用户填写的名称"
 #   cover: "/images/now/已准备的封面.webp"
+#   douban: "" # 可选：漫画 / 书籍用 https://book.douban.com/subject/…/，电影用 movie.douban.com
 #   note: "可选短评"
 # thought: "用户填写的碎碎念"
 ---

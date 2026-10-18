@@ -46,6 +46,7 @@ export const photos: FanPhoto[] = [
 - 同城场次使用 `pinOffset` 做标记避让，虚线仍指向真实场馆位置。
 - 后续新增看过的场次：直接追加记录即可。暂时不想在首页展示时设置 `showOnHome: false`；首页不会展示未来行程或占位条目。
 - 修改场次数据后重新构建即可，无需安装新的地图依赖。
+- 手机地图下方场次入口按双列等宽排列，城市 / 团体与日期分两层；奇数个入口的最后一项通栏，保留双日场次完整日期和原详情关联。桌面地图标记与数据不变。
 
 ## 内容修改
 
@@ -101,6 +102,7 @@ export const photos: FanPhoto[] = [
 - **唯一编辑入口：`src/content/homepage/now.md`**；完整注释模板在 `templates/homepage-now.md`。
 - 内容全在 frontmatter：`updated: "YYYY-MM-DD"`、`draft`，可选 `music`、`reading`、`thought`。不解析正文栏目，不从聊天或组件里保留另一份近况。
 - 音乐填写 `title`、`cover`，可选 `artist` / `note`；阅读填写 `type`（漫画 / 书籍 / 电影）、`title`、`cover`，可选 `note`。
+- 音乐可填 `spotify: "https://open.spotify.com/track/歌曲ID"`，阅读可填 `douban: "https://book.douban.com/subject/条目ID/"`（电影使用 `movie.douban.com`）。填写后整行的封面 / 名称可点击，在新标签页打开作品详情；留空仍显示普通内容。构建会拒绝错误平台、非 HTTPS、非作品详情页或漫画 / 书籍误链电影的地址，不自动猜链接，也不拉取播放数据。
 - 封面须使用本地 `/images/now/` 或其他已有 `/images/` 路径；同封面可直接复用 `/images/albums/`。新封面用用户提供或确认的素材，生成网页副本、保留原件并记录来源。
 - 日期由用户维护，只显示 `YYYY.MM.DD`，绝不用构建时间替代。草稿、三栏全空时整块隐藏，空白栏目不渲染；有音乐 / 阅读项时名称与真实封面不可缺。
 - 改为 `draft: false` 且填好素材后重新构建即可显示，不用改组件。

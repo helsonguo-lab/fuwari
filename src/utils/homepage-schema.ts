@@ -15,16 +15,34 @@ const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期须为带引号的 Y
 	}, "日期无效");
 const optionalDate = z.preprocess(blankToUndefined, date.optional());
 const optionalImage = z.preprocess(blankToUndefined, localImage.optional());
+const optionalServiceLink = (hosts: string[], path: RegExp) => z.preprocess(blankToUndefined,
+	text.url("请填写完整链接").refine((value) => {
+		try {
+			const link = new URL(value);
+			return link.protocol === "https:" && hosts.includes(link.hostname) &&
+				!link.username && !link.password && !link.port && path.test(link.pathname);
+		} catch {
+			return false;
+		}
+	}, "请填写对应平台的 HTTPS 作品详情页链接").optional());
+const spotifyLink = optionalServiceLink(["open.spotify.com"], /^\/(?:intl-[a-z]{2}\/)?track\/[A-Za-z0-9]{22}\/?$/);
+const doubanLink = optionalServiceLink(["book.douban.com", "movie.douban.com"], /^\/subject\/\d+\/?$/);
 
 export const homepageSchema = z.object({
 	updated: optionalDate,
 	draft: z.boolean().default(true),
-	music: z.preprocess(blankToUndefined, z.object({ title: text, cover: localImage, artist: optionalText, note: optionalText }).optional()),
-	reading: z.preprocess(blankToUndefined, z.object({ type: z.enum(["漫画", "书籍", "电影"]), title: text, cover: localImage, note: optionalText }).optional()),
+	music: z.preprocess(blankToUndefined, z.object({ title: text, cover: localImage, artist: optionalText, note: optionalText, spotify: spotifyLink }).optional()),
+	reading: z.preprocess(blankToUndefined, z.object({ type: z.enum(["漫画", "书籍", "电影"]), title: text, cover: localImage, note: optionalText, douban: doubanLink }).optional()),
 	thought: optionalText,
 }).superRefine((data, ctx) => {
 	if (!data.draft && (data.music || data.reading || data.thought) && !data.updated) {
 		ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["updated"], message: "正式近况须填写日期" });
+	}
+	if (data.reading?.douban) {
+		const expectedHost = data.reading.type === "电影" ? "movie.douban.com" : "book.douban.com";
+		if (!data.reading.douban.startsWith(`https://${expectedHost}/`)) {
+			ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["reading", "douban"], message: "漫画 / 书籍请链接豆瓣读书，电影请链接豆瓣电影" });
+		}
 	}
 });
 

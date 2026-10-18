@@ -5,10 +5,12 @@ music:
   title: "drop dead"
   artist: "Olivia Rodrigo"
   cover: "/images/now/drop-dead-olivia-rodrigo.webp"
+  spotify: "https://open.spotify.com/track/6gkbtMtioHgtyGjrMel6ei"
 reading:
   type: "漫画"
   title: "来自深渊"
   cover: "/images/now/made-in-abyss-vol-1.webp"
+  douban: "https://book.douban.com/subject/27090965/"
 thought: "NMIXX回归大发"
 ---
 

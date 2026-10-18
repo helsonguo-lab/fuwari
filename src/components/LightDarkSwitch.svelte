@@ -7,6 +7,7 @@ import {
 	applyThemeToDocument,
 	getStoredTheme,
 	setTheme,
+	THEME_CHANGE_EVENT,
 } from "@utils/setting-utils.ts";
 import { onMount } from "svelte";
 import type { LIGHT_DARK_MODE } from "@/types/config.ts";
@@ -24,14 +25,26 @@ let mode: LIGHT_DARK_MODE = $state(AUTO_MODE);
 
 onMount(() => {
 	mode = getStoredTheme();
+	// Desktop and mobile controls are separate islands, but share one setting.
+	const syncTheme = () => {
+		mode = getStoredTheme();
+		applyThemeToDocument(mode);
+	};
+	const syncStorage = (event: StorageEvent) => {
+		if (event.key === "theme" || event.key === null) syncTheme();
+	};
+	window.addEventListener(THEME_CHANGE_EVENT, syncTheme);
+	window.addEventListener("storage", syncStorage);
 	const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
 	const changeThemeWhenSchemeChanged: Parameters<
 		typeof darkModePreference.addEventListener<"change">
 	>[1] = (_e) => {
-		applyThemeToDocument(mode);
+		syncTheme();
 	};
 	darkModePreference.addEventListener("change", changeThemeWhenSchemeChanged);
 	return () => {
+		window.removeEventListener(THEME_CHANGE_EVENT, syncTheme);
+		window.removeEventListener("storage", syncStorage);
 		darkModePreference.removeEventListener(
 			"change",
 			changeThemeWhenSchemeChanged,

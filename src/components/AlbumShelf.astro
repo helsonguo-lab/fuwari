@@ -43,8 +43,14 @@ import { url } from "../utils/url-utils";
       const dialog = this.querySelector("dialog");
       if (!trigger || !dialog) return;
 
+      // Swup may reconnect cached markup carrying an old open attribute.
+      dialog.close();
+      dialog.removeAttribute("open");
+
       trigger.addEventListener("click", () => dialog.showModal(), { signal });
-      dialog.addEventListener("close", () => trigger.focus({ preventScroll: true }), { signal });
+      dialog.addEventListener("close", () => {
+        if (!dialog.open && this.isConnected) trigger.focus({ preventScroll: true });
+      }, { signal });
       dialog.addEventListener("click", event => {
         if (event.target !== dialog) return;
         const box = dialog.getBoundingClientRect();
@@ -56,6 +62,7 @@ import { url } from "../utils/url-utils";
 
     disconnectedCallback() {
       this.events?.abort();
+      this.querySelector("dialog")?.close();
     }
   }
   if (!customElements.get("album-shelf")) customElements.define("album-shelf", AlbumShelf);

@@ -1,8 +1,11 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
 import { url } from "../utils/url-utils";
 interface Props { now?: CollectionEntry<"homepage">["data"]; }
 const { now } = Astro.props;
+const MusicRow = now?.music?.spotify ? "a" : "div";
+const ReadingRow = now?.reading?.douban ? "a" : "div";
 ---
 {now && <section class="surface-home now-note mb-4" aria-labelledby="now-title" data-pagefind-ignore>
   <header>
@@ -10,20 +13,20 @@ const { now } = Astro.props;
     <time datetime={now.updated}>{now.updated?.replaceAll('-', '.')}</time>
   </header>
   <div class="now-rows">
-    {now.music && <div class="now-row">
+    {now.music && <MusicRow class="now-row" href={now.music.spotify} target={now.music.spotify ? "_blank" : undefined} rel={now.music.spotify ? "noopener noreferrer" : undefined} aria-label={now.music.spotify ? `在 Spotify 打开 ${now.music.title}${now.music.artist ? ` · ${now.music.artist}` : ""}（新标签页）` : undefined}>
       <span class="now-label">最近在听</span>
       <img class="music-cover" src={url(now.music.cover)} alt={`${now.music.title} 专辑封面`} width="48" height="48" loading="lazy" decoding="async" />
-      <div class="now-copy"><p class="now-name">{now.music.title}{now.music.artist && <span class="now-artist"> · {now.music.artist}</span>}</p>
+      <div class="now-copy"><p class="now-name">{now.music.title}{now.music.artist && <span class="now-artist"> · {now.music.artist}</span>}{now.music.spotify && <Icon name="material-symbols:open-in-new-rounded" class="now-external" aria-hidden="true" />}</p>
         {now.music.note && <p class="now-detail">{now.music.note}</p>}
       </div>
-    </div>}
-    {now.reading && <div class="now-row">
+    </MusicRow>}
+    {now.reading && <ReadingRow class="now-row" href={now.reading.douban} target={now.reading.douban ? "_blank" : undefined} rel={now.reading.douban ? "noopener noreferrer" : undefined} aria-label={now.reading.douban ? `在豆瓣打开《${now.reading.title}》（新标签页）` : undefined}>
       <span class="now-label">最近在看</span>
       <div class="reading-cover"><img src={url(now.reading.cover)} alt={`${now.reading.title} ${now.reading.type}封面`} loading="lazy" decoding="async" /></div>
-      <div class="now-copy"><p class="now-name">{now.reading.title}</p>
+      <div class="now-copy"><p class="now-name">{now.reading.title}{now.reading.douban && <Icon name="material-symbols:open-in-new-rounded" class="now-external" aria-hidden="true" />}</p>
         {now.reading.note && <p class="now-detail">{now.reading.note}</p>}
       </div>
-    </div>}
+    </ReadingRow>}
     {now.thought && <div class="now-row now-thought"><span class="now-label">最近在想</span><p>{now.thought}</p></div>}
   </div>
 </section>}
@@ -31,9 +34,13 @@ const { now } = Astro.props;
   .now-note { padding: 18px 20px 17px; color: var(--home-ink); }
   header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .35rem 1rem; margin-bottom: 12px; }
   h2 { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
-  time { color: var(--home-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  time { color: var(--home-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
   .now-rows { display: grid; gap: .75rem; }
-  .now-row { display: grid; grid-template-columns: 4rem 48px minmax(0, 1fr); align-items: center; gap: .65rem; font-size: 14px; }
+  .now-row { display: grid; grid-template-columns: 4rem 48px minmax(0, 1fr); align-items: center; gap: .65rem; font-size: 15px; }
+  a.now-row { min-height: 48px; border-radius: 6px; color: inherit; }
+  a.now-row:hover .now-name { text-decoration: underline; text-underline-offset: 3px; }
+  a.now-row:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+  .now-external { display: inline-block; width: 14px; height: 14px; margin-left: .35rem; vertical-align: -.1em; color: var(--primary); }
   .now-label { color: var(--home-muted); font-size: 12px; }
   .music-cover { width: 48px; height: 48px; object-fit: contain; border-radius: 5px; }
   .reading-cover { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; }

@@ -7,6 +7,8 @@ import {
 import { expressiveCodeConfig, siteConfig } from "@/config";
 import type { LIGHT_DARK_MODE } from "@/types/config";
 
+export const THEME_CHANGE_EVENT = "theme-change";
+
 export function getDefaultHue(): number {
 	const fallback = "250";
 	const configCarrier = document.getElementById("config-carrier");
@@ -56,6 +58,7 @@ export function applyThemeToDocument(theme: LIGHT_DARK_MODE) {
 export function setTheme(theme: LIGHT_DARK_MODE): void {
 	localStorage.setItem("theme", theme);
 	applyThemeToDocument(theme);
+	window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
 }
 
 export function getStoredTheme(): LIGHT_DARK_MODE {

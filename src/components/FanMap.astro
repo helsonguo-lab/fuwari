@@ -151,8 +151,10 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
                 aria-controls={`fan-map-dialog-${marker.id}`}
                 aria-label={`打开 ${marker.group} ${marker.city} ${formatDates(marker.dates)} 场次详情`}>
           <i class:list={["legend-dot", marker.group.toLowerCase()]} aria-hidden="true"></i>
-          <span>{marker.city}</span>
-          <span class="chip-date">{formatDates(marker.dates)}</span>
+          <span class="chip-copy">
+            <span class="chip-heading"><span class="chip-city">{marker.city}</span><span class="chip-group">{marker.group}</span></span>
+            <span class="chip-date">{formatDates(marker.dates)}</span>
+          </span>
         </button>
       ))}
     </div>
@@ -204,18 +206,19 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
       this.events = new AbortController();
       const { signal } = this.events;
 
-      this.querySelectorAll<HTMLButtonElement>("[data-map-trigger]").forEach(trigger => {
-        const dialog = this.querySelector<HTMLDialogElement>(`#${trigger.getAttribute("aria-controls")}`);
-        if (!dialog) return;
+      this.querySelectorAll<HTMLDialogElement>("dialog").forEach(dialog => {
+        dialog.close();
+        dialog.removeAttribute("open");
+        delete dialog.dataset.lastTriggerIndex;
         const triggers = [...this.querySelectorAll<HTMLButtonElement>(`[aria-controls="${dialog.id}"]`)];
 
-        trigger.addEventListener("click", () => {
-          dialog.dataset.lastTriggerIndex = String(triggers.indexOf(trigger));
+        triggers.forEach((trigger, index) => trigger.addEventListener("click", () => {
+          dialog.dataset.lastTriggerIndex = String(index);
           dialog.showModal();
-        }, { signal });
+        }, { signal }));
         dialog.addEventListener("close", () => {
           const index = Number(dialog.dataset.lastTriggerIndex ?? "-1");
-          triggers[index]?.focus({ preventScroll: true });
+          if (!dialog.open && this.isConnected) triggers[index]?.focus({ preventScroll: true });
         }, { signal });
         dialog.addEventListener("click", event => {
           if (event.target !== dialog) return;
@@ -229,6 +232,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
 
     disconnectedCallback() {
       this.events?.abort();
+      this.querySelectorAll("dialog").forEach(dialog => dialog.close());
     }
   }
   if (!customElements.get("fan-map")) customElements.define("fan-map", FanMap);
@@ -310,22 +314,30 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   .pin-city { font-size: 11px; font-weight: 700; letter-spacing: .06em; }
   .pin-date { font-size: 9px; opacity: .66; }
 
-  .map-event-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .map-event-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
   .map-event-chip {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 7px;
-    min-height: 44px;
-    padding: 0 12px;
+    gap: 8px;
+    min-width: 0;
+    min-height: 60px;
+    padding: 10px 12px;
     border-radius: 10px;
-    background: var(--btn-regular-bg);
+    border: 1px solid var(--home-line);
+    background: color-mix(in srgb, var(--btn-regular-bg) 42%, var(--card-bg));
     color: var(--btn-content);
     font-size: 12px;
+    text-align: left;
     transition: background-color .16s ease;
   }
+  .map-event-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .map-event-chip:hover { background: var(--btn-regular-bg-hover); }
   .map-event-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-  .chip-date { color: var(--home-muted); font-size: 11px; }
+  .chip-copy { display: grid; min-width: 0; gap: 3px; overflow-wrap: anywhere; }
+  .chip-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 3px 7px; line-height: 1.4; }
+  .chip-city { font-size: 13px; font-weight: 600; }
+  .chip-group { color: var(--home-muted); font-size: 10px; }
+  .chip-date { color: var(--home-muted); font-size: 11px; line-height: 1.45; font-variant-numeric: tabular-nums; }
 
   .map-dialog {
     /* Explicit fixed positioning keeps the dialog centered in the visual viewport
@@ -382,8 +394,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     .pin-shape { height: 42px; width: 31px; left: 6.5px; }
     .pin-label { display: none; }
     .geo-labels { display: none; }
-    .map-event-list { gap: 6px; }
-    .map-event-chip { min-height: 44px; padding-inline: 10px; }
+    .map-event-chip { padding-inline: 10px; }
     .map-dialog {
       width: calc(100vw - 24px);
       max-height: calc(100vh - 24px);
