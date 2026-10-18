@@ -50,6 +50,7 @@ export const photos: FanPhoto[] = [
 ## 内容修改
 
 - 名称、简介、主题色、头像、封面及社交链接：src/config.ts
+- 浏览器标签页图标：`src/config.ts` 的 `favicon` 配置；蓝粉双色星星原图位于 `public/favicon/blue-pink-star.svg`，另有 32px PNG 和根目录 `public/favicon.ico`（含 16/32/48px）作为兼容格式。图标链接使用独立文件名或版本参数，避免沿用旧图标缓存；浅色和深色模式均使用同一图案。
 - 首页欢迎语：src/components/FanWelcome.astro
 - 文章：src/content/posts/，复用 Fuwari 原生 Markdown；追星手记 category 只填“线下”或“生日”，科研文章填“科研手记”。
 - 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。

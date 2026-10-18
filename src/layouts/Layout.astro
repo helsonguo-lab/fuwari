@@ -110,6 +110,7 @@ const bannerOffset =
 			<link rel="icon"
 				  href={favicon.src.startsWith('/') ? url(favicon.src) : favicon.src}
 				  sizes={favicon.sizes}
+				  type={favicon.type}
 				  media={favicon.theme && `(prefers-color-scheme: ${favicon.theme})`}
 			/>
 		))}

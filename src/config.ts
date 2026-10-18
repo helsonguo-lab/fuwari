@@ -19,7 +19,23 @@ export const siteConfig: SiteConfig = {
 		credit: { enable: false, text: "" },
 	},
 	toc: { enable: true, depth: 2 },
-	favicon: [{ src: "/images/baby-blue-star.svg", sizes: "any" }],
+	favicon: [
+		{
+			src: "/favicon.ico?v=blue-pink-star",
+			sizes: "16x16 32x32 48x48",
+			type: "image/x-icon",
+		},
+		{
+			src: "/favicon/blue-pink-star-32.png",
+			sizes: "32x32",
+			type: "image/png",
+		},
+		{
+			src: "/favicon/blue-pink-star.svg",
+			sizes: "any",
+			type: "image/svg+xml",
+		},
+	],
 };
 export const navBarConfig: NavBarConfig = {
 	links: [

@@ -40,6 +40,7 @@ export type SiteConfig = {
 
 export type Favicon = {
 	src: string;
+	type?: string;
 	theme?: "light" | "dark";
 	sizes?: string;
 };
