@@ -64,7 +64,7 @@
 - CSP 实际 Worker 预览发现 Pagefind WASM 以及打包后的 data 字体被初版策略拦截；已补最小的 `wasm-unsafe-eval`（不是 JS 的 unsafe-eval）与 font-src data:，复测搜索和 6 条内容路由无 CSP 违规（`security-policy-local.json`）。初次失败保留为 `security-policy-initial.json`，不计为通过。
 - 间接依赖只在各上游既有兼容范围内更新，无强行跨主版本覆盖。pnpm 自动生成的发布年龄例外已移除，启用 24 小时 strict gate；`vite>rollup` 固定 4.64.7，避免刚发布的各平台二进制通过例外绕过。冻结安装及 peer 检查通过，allowBuilds 四项不变。
 - 扫描由 219 条降为 **40 条（2 critical / 22 high / 12 moderate / 4 low）**。逐项旧/现版本、修复范围、触发条件与处置见 [依赖报告](security-dependencies-2026-10-18.md)。剩余项是静态框架/构建/开发工具约束，未发现能由现有访客入口触发的高风险链路；不将其标作已修复或零漏洞，不为清零扫描迁移 Astro 大版本。
-- 仓库新增无依赖 `pnpm security:check`，覆盖 JSON-LD round-trip、正文协议/HTML、GitHub 指令、Worker 308/404/响应头和包管理器版本；CI 合并重复的 check/build job，并在 Node 22/24 完整运行。
+- 仓库新增无依赖 `pnpm security:check`，覆盖 JSON-LD round-trip、正文协议/HTML、GitHub 指令、Worker 308/404/响应头和包管理器版本；CI 合并重复的 check/build job，配置为在 Node 22/24 完整运行。安全脚本另以本机 Node 22 实际复测通过；未声称已取得远端 CI 成功记录。
 
 ### 第三阶段：结构精简结果
 
@@ -79,7 +79,7 @@
 | 可见内容 | content-utils.ts 的三个草稿过滤入口统一；文章 entry.render 合为一次；原五个维护入口不变 |
 
 - 无资源或直接依赖删除：旧图、原图、字体、许可证、模板与 Markdown 插件均有维护用途，没有凭文本搜索盲删。
-- 产物 223 → 221 文件，12,631,608 → 12,630,380 bytes（-1,228）；JS 463,985 → 474,834（+10,849，主要为 Svelte 安全更新/边界防护），CSS 269,623 → 261,362（-8,261）。锁定间接节点 1260 → 1269。不是以“删行/体积大降”作为质量结论。
+- 最终产物 223 → 221 文件，12,631,608 → 12,630,406 bytes（-1,202）；JS 463,985 → 474,860（+10,875，主要为 Svelte 安全更新/边界防护），CSS 269,623 → 261,362（-8,261）。锁定间接节点 1260 → 1269。不是以“删行/体积大降”作为质量结论。
 - 首页在 390/320/1440 浅深色共 6 组截图尺寸相同，逐像素比较（通道差阈值 8）均 0 差异；已查看手机浅色和桌面深色截图。见 `security-visual-diff.json` 与 `security-{before,final}-*.png`。
 
 ### 第四阶段：本地验收
@@ -92,8 +92,16 @@
 - 非通过/边界：全仓只读 Biome CI 仍有格式/导入顺序等历史基线问题（本次实测 83 errors / 7 warnings；未跑写模式）；新增 7 个脚本/工具模块独立 biome lint 通过。Browserslist 基线告警随兼容数据更新消失；中文 Pagefind stemming 提示保留。安全 fixture 早期测试因过于宽泛的字符串断言误把已引用的 meta 属性当脚本失败，已改为实际解析 JSON-LD/HTML 并重跑；另一次完整 fixture 测试超时，延长后通过，均不计初次为通过。
 - 本轮只测本机 Chromium / CDP 触屏，不冒称真实 iOS/Android、Safari/Firefox 或独立渗透测试通过；外站登录/播放未测，后台接口不适用。凭据扫描为模式检查（当前文件、全部可达历史文本差异、产物），不是对不可达历史对象/所有潜在密钥格式的证明。
 
-### 发布与回退（发布后补证）
+### 发布与回退（已发布并核验）
 
 - 当次用户已明确授权验证后推送并更新网站。发布前基线 Git 为 `fa97e42`，现有 Worker 上一版为 `b3947f8c-ba91-4bd3-a39c-e87db0a1f31c`（实际 deployments list 核对）。
 - 若发布后回归失败，可对现有 fuwari 执行 `wrangler rollback b3947f8c-ba91-4bd3-a39c-e87db0a1f31c`；回退会恢复该版没有新增安全头/HTTP 308 的行为。源码回退应从已保留提交另建修复，不 reset 丢弃后续工作。
-- 正式域名验证与新部署版本待实际发布后填写，不将上面本地通过扩大为线上通过。
+- 安全/构建修复 `52cdb29`、正文/依赖/检查 `6bdd842`、结构精简 `1885bb5` 已推送。发布后的慢加载复测发现搜索在 Pagefind 超过 2 秒才 ready 时没有恢复；补修 `45f399c` 移除过早的初始化短路，让 ready 状态重新触发预填查询。本地增加真实索引 HEAD/模块延迟测试并完整回归通过，再推送、重新构建和部署。
+- 最终正式 Worker 版本 **`9eb10465-a8f2-4d3a-b88b-1f4f47692163`**（`wrangler deploy --keep-vars`，同一 fuwari、同一账户与 ASSETS），正式代码为 `45f399c`。此前手动 `47265885-d475-4e19-9b94-a881d20345e6` / `f59e42b5-473d-462a-ab3e-445606e8431d` 以及随后额外出现的发布均不是最终验收版本。源码基线标签 `rollback-before-security-20261018-fa97e42` 已推送保留。
+- 发布盘点纠正：两次代码 push 后，手动部署约半分钟后都出现额外版本（`78cf43f5-…` / `fee6e4e2-…`），线上引用变成不同构建哈希；现象与 Git 自动构建一致，但未修改集成配置或声称已核对其完整日志。待额外发布结束后重新部署本机已验证 dist，逐一核对 **13 个 CSS/JS/Svelte component/renderer** 的线上 SHA256，全部一致。最终文档-only 提交使用 `[skip ci]` 避免重复自动构建；运行代码提交不跳过检查。不能继续假定该账户“push 绝不触发网站发布”，也不能把不同构建产物误记为哈希一致。
+- 正式域名实测：HTTP `/` 及 `/gallery/?group=IVE` → HTTPS **308**，路径/查询保留；`/collection/` 仍为 **301 /research/**；首页/相册/RSS/站点地图/Pagefind 均 200，缺失页、`.env`、`.git/config`、源码与 security fixture 路由均 404。页面、资源、301 与 404 都有 CSP、X-Frame-Options、nosniff、Referrer-Policy、Permissions-Policy、仅本域 HSTS。
+- TLS 实际验证链可信，TLSv1.3，证书 CN wonyoung.xyz，2026-10-15 至 2027-01-13，有效且无跳过校验。证据 `security-tls-live.json`。
+- 正式站 6 路由 × 3 尺寸 × 浅/深色通过：布局、侧栏、无溢出、无未捕获错误、实际响应头及 0 CSP 违规；真实搜索/高亮、专辑与焦点、地图、9/4/5 相册筛选/放大/关闭、RSS/重定向通过。`security-live-release.json` 和 `security-release-live-*.png`；只屏蔽本机已知 DNS 失败的可选 Cloudflare analytics，本站 HTML/脚本/字体/图片/索引全是正式域名真实请求。
+- 未屏蔽 analytics 的正式域名专项也通过：`security-policy-live.json` 查询文章成功、6 路由 0 页面错误/0 CSP 违规；仅可选 beacon DNS 网络报错。原始慢加载失败保留 `security-policy-live-initial.json`。5 轮正式域名 Swup/弹层/筛选/放大生命周期另通过 `security-lifecycle-live.json`。
+- 最终发布产物一致性：`review-release-report.json` 核对 7 条页面/RSS 路由与当前构建引用，13 个直接 CSS/JS/Svelte component/renderer SHA256 均相同；串行低频验证没有网络重试。首次并行下载出现瞬态 fetch failure 后改为串行并重跑，不记初次为通过。正式内容未改变，fixture/草稿未混入。部署前后 `git diff --check` 通过。
+- 线上旧完整 redesign 套件首次在导航阶段超时；未屏蔽 beacon 的 36 路由全安全套件也在 240 秒整体超时，均不计为通过。最终线上通过的是上面独立列出的真实域名矩阵/专项/生命周期/哈希检查，不扩大到超时套件、第三方服务或未测试浏览器。GitHub Actions API 当次返回无 runs，故不声称远端 CI 已执行成功；CI 配置和本地命令验证分别记录。
