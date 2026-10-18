@@ -14,7 +14,18 @@
 - 本地预览：`pnpm dev`
 - 正式构建：`pnpm build`，静态文件位于 dist 文件夹。
 - 检查代码：`pnpm check`
+- 安全边界回归：`pnpm security:check`（Node 内置断言，无测试依赖）
 - 预览正式构建及搜索：`pnpm preview`
+
+### 安全与发布维护（2026-10-18）
+
+- 审计与精简记录：`docs/security-review-2026-10-18.md`；逐项依赖告警：`docs/security-dependencies-2026-10-18.md`。剩余构建工具告警不等于线上可利用漏洞，也不代表零风险。
+- 保持 pnpm 11.25.0、冻结锁文件及 `allowBuilds` 许可。新版本默认等待 24 小时且禁止自动绕过；Vite 的 Rollup 暂固定为已过等待期的兼容修复版 4.64.7。
+- 发布前顺序：冻结安装 → `pnpm security:check` → `pnpm check` → `pnpm build`（包含 Pagefind）→ `git diff --check` → 浏览器回归。CI 的 Node 22/24 共用同一检查流程。
+- `worker/index.ts` 是 HTTPS 308、CSP、HSTS 等响应头的唯一入口；`wrangler.jsonc` 的 ASSETS 仍指向本站 `dist/`，不新增 Worker。所有资源请求经过现有 Worker，需计入 Worker invocation。
+- `pnpm preview` 只预览静态产物；响应头兼容性应使用 `npm.cmd exec --yes --package=wrangler@4 -- wrangler dev --local`，发布后再核验正式域名。部署仍用现有 `wrangler deploy --keep-vars`，仅在当次获得授权后执行。
+- Markdown 正文保留允许的格式、公式、代码和指令；源 HTML 的脚本、事件属性、危险 URL 将显示为转义文字或中和链接。GitHub 指令仅接受合法 `owner/repo`。不要靠 Markdown 注入脚本扩展功能。
+- 无新增测试依赖；工作区 `work/` 的浏览器脚本和隔离 fixture 不属于网站，绝不能部署。真实回忆草稿仍保持隐藏。
 
 ## 添加照片
 
@@ -77,7 +88,8 @@ export const photos: FanPhoto[] = [
 ### 布局状态与组件
 
 - `src/pages/[...page].astro` 通过 `MainGridLayout layout="home|home-list"` 切换首页布局；内页不传 `layout`，保持默认双列侧栏。
-- `MainGridLayout.astro` 把 `SideBar` 放进 `main#swup-container`，所以 Swup 站内切换时首页 / 内页的侧栏会一起替换；`#main-grid[data-layout]` 提供布局标记，`Layout.astro` 在 `page:view` 读取并同步 `body.layout-home` / `body.layout-home-list`。
+- `MainGridLayout.astro` 把 `SideBar` 放进 `main#swup-container`，所以 Swup 站内切换时首页 / 内页的侧栏会一起替换；`#main-grid[data-layout]` 提供布局标记，`src/scripts/site-runtime.ts` 在 `page:view` 读取并同步 `body.layout-home` / `body.layout-home-list`。
+- `Layout.astro` 只保留骨架、元信息、资源和首屏主题初始化；`src/styles/layout.css` 管布局几何，`baby-blue.css` 管主题/首页表面。`site-runtime.ts` 统一注册 Swup；`panels.ts` 管持久导航面板；`page-scrollbars.ts` 和 `photo-lightbox.ts` 的页面资源在替换前销毁、进入后重新创建，不把旧 Observer/DOM 引用留给缓存页面。
 - 首页首屏使用 `FanWelcome.astro`：`Profile compact` 只显示头像 / 名称 / 简介，社交入口由 `ProfileLinks.astro` 统一提供；`MemoryStack.astro` 仍只在有正式回忆时渲染。
 - `HomepageNow.astro`、`FanGroups.astro`、`FanMap.astro`、`PostCard.astro`、`Footer.astro` 使用稳定的 `surface-home` 表面，不再叠加大量毛玻璃；玻璃只集中在导航、菜单和既有弹层。
 - `HomeArchiveDetails.astro` 在分页后提供原生 `<details>`「分类与标签」；`Categories.astro` / `Tags.astro` 新增 `compact` 形态，仍读取原分类 / 标签数据。

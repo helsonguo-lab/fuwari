@@ -20,7 +20,7 @@
 
 ## HTML 直出与信任边界
 
-1. Markdown 正文：仅受版本控制的站主内容；无网络 Markdown/访客投稿。Astro/remark/rehype 在构建时生成公式、代码和 HTML。原始 HTML 不应当作为不可信投稿接收；若以后增加投稿，须先新增全正文净化边界，不可复用“站主可信”假设。
+1. Markdown 正文：仅受版本控制的站主内容；无网络 Markdown/访客投稿。新增 `remark-content-safety.mjs` 在公式/代码/指令生成前检查源 HTML 和内联/引用链接：危险协议中和为 `#`，脚本、事件、srcdoc、非白名单标签/属性转成文本；允许的正文 HTML、公式和代码不变。若以后增加投稿，仍须另行设计完整净化与发布审核，不可把静态站升级为在线不可信 HTML 服务。
 2. JSON-LD：站主元数据仍必须脚本安全编码，不能依赖“内容可信”跳过边界转义。
 3. 回忆 emotion：markdown-it zero 模式，html:false，仅段落/强调/换行/行内代码，再经 sanitize-html 白名单且无属性；保留双重防护。
 4. 地图 landPaths：本地固定 Natural Earth 派生 SVG 路径常量，不读取 URL、第三方响应或用户输入。
@@ -56,3 +56,44 @@
 - CSP 第一阶段允许现有内联脚本/样式；不含 unsafe-eval，仅允许本站脚本和 Cloudflare beacon，允许现有 Iconify/GitHub 请求，禁止 object、外站嵌入、base，限制 form-action。此 CSP 不是阻断所有内联 XSS 的严格 CSP；后续须配合 Swup 的脚本执行机制评估 hash/nonce，不虚称已消除 unsafe-inline。HSTS 仅本域，无 includeSubDomains/preload。
 - 安全批次类型检查 0 errors/0 warnings/1 既有 hint；完整构建 6 页，Pagefind 5 页。原版两处脚本注入在隔离浏览器/VM 成功复现，修复后无执行且内容可 round-trip；真实 Pagefind 高亮、恶意摘要/链接、异步先后顺序/清空均复测通过（`outputs/security-browser-security-stage.json`）。
 - 34 个可达历史提交、当前文本及产物模式扫描未发现凭据候选；9 张公开照片无 EXIF/XMP/IPTC。线上 `.env`、`.git/config`、`src/config.ts` 均 404。公开来源/许可证 Markdown 是有意发布的维护资料，不算源码泄漏；`.gitkeep` 是无敏感内容占位文件，不删除。
+
+### 第二阶段补充复测与依赖处置
+
+- 正文安全使用已存在的 sanitize-html 解析器解码 HTML 属性，配合 remark AST 转义/中和，不另写 Markdown/HTML 解析器。实际隔离构建验证 script、onerror、实体编码 javascript、Markdown 直接/引用链接和 iframe/srcdoc；允许 HTML、公式、代码、GitHub 指令保留。
+- 图片的 8 种路径输入（明文/编码/双编码点段、单点段、反斜线、协议相对地址、查询、片段）与真实目录 junction 越界均被拒绝构建。正式源文件、public 和草稿没有为测试改动；安全 fixture 使用单独 public 副本，绝不部署。
+- CSP 实际 Worker 预览发现 Pagefind WASM 以及打包后的 data 字体被初版策略拦截；已补最小的 `wasm-unsafe-eval`（不是 JS 的 unsafe-eval）与 font-src data:，复测搜索和 6 条内容路由无 CSP 违规（`security-policy-local.json`）。初次失败保留为 `security-policy-initial.json`，不计为通过。
+- 间接依赖只在各上游既有兼容范围内更新，无强行跨主版本覆盖。pnpm 自动生成的发布年龄例外已移除，启用 24 小时 strict gate；`vite>rollup` 固定 4.64.7，避免刚发布的各平台二进制通过例外绕过。冻结安装及 peer 检查通过，allowBuilds 四项不变。
+- 扫描由 219 条降为 **40 条（2 critical / 22 high / 12 moderate / 4 low）**。逐项旧/现版本、修复范围、触发条件与处置见 [依赖报告](security-dependencies-2026-10-18.md)。剩余项是静态框架/构建/开发工具约束，未发现能由现有访客入口触发的高风险链路；不将其标作已修复或零漏洞，不为清零扫描迁移 Astro 大版本。
+- 仓库新增无依赖 `pnpm security:check`，覆盖 JSON-LD round-trip、正文协议/HTML、GitHub 指令、Worker 308/404/响应头和包管理器版本；CI 合并重复的 check/build job，并在 Node 22/24 完整运行。
+
+### 第三阶段：结构精简结果
+
+| 职责 | 当前入口与生命周期 |
+| --- | --- |
+| 页面骨架/首屏 | Layout.astro 保留 meta、资源、首屏主题，不再混合交互脚本；历史不可执行 workaround 删除 |
+| 导航/布局/滚动 | site-runtime.ts，文档生命周期只注册一次；每次 page:view 从新 DOM 同步布局/滚动，下一次 visit:start 取消上一轮定时器 |
+| 面板 | panels.ts，持久导航只绑定一次，委托事件覆盖后挂载 Svelte；observer 同步 aria/inert；离开时关闭，保留 Escape 焦点规则 |
+| 公式滚动条 | page-scrollbars.ts，body scrollbar 初始化一次；每页 observer/实例在替换前 disconnect/destroy，并拆除生成包装层 |
+| 图片查看 | photo-lightbox.ts，每页单实例，替换前 destroy，进入后重建；沿用原 SVG、PhotoSwipe 和选项 |
+| 样式 | layout.css 单独负责壳几何；baby-blue.css 保留主题/首页表面；组件局部样式不动，数值未改 |
+| 可见内容 | content-utils.ts 的三个草稿过滤入口统一；文章 entry.render 合为一次；原五个维护入口不变 |
+
+- 无资源或直接依赖删除：旧图、原图、字体、许可证、模板与 Markdown 插件均有维护用途，没有凭文本搜索盲删。
+- 产物 223 → 221 文件，12,631,608 → 12,630,380 bytes（-1,228）；JS 463,985 → 474,834（+10,849，主要为 Svelte 安全更新/边界防护），CSS 269,623 → 261,362（-8,261）。锁定间接节点 1260 → 1269。不是以“删行/体积大降”作为质量结论。
+- 首页在 390/320/1440 浅深色共 6 组截图尺寸相同，逐像素比较（通道差阈值 8）均 0 差异；已查看手机浅色和桌面深色截图。见 `security-visual-diff.json` 与 `security-{before,final}-*.png`。
+
+### 第四阶段：本地验收
+
+- 冻结安装、`pnpm security:check`、`pnpm check` 均通过：79 文件，0 errors / 0 warnings / 1 既有 `_cssVar` hint。完整 `pnpm build`：6 页、Pagefind 5 页 / 259 words。最终 `git diff --check` 于发布前复核。
+- 正式内容经真实 Workers 本地生产预览验证：6 路由 × 390×844、320×568、1440×1000 × 浅/深色，无横向溢出、无未捕获脚本错误；Pagefind 真实索引及恶意响应边界通过。另原 redesign 套件 9 视口、200% 字号、减少动画、菜单/三态主题、地图、专辑、分类/标签、RSS、首页/文章/内页往返通过。
+- 新生命周期套件 5 轮缓存往返，验证一次点击只调用一次 showModal、关闭/焦点回到入口、打开弹层后导航不残留、相册 9/4/5 筛选与放大关闭、只有一个公式 Observer，无整页刷新。生产不启用草稿回忆。
+- 隔离 homepage-fixture 第 2 页与回忆循环通过；6 组回忆测试覆盖 desktop/mobile/320/横屏/深色/减少动画，双向触屏、短拖回弹、纵向不误翻、取消、洗牌与队列等通过。测试文案不是用户内容，保留隔离。
+- 证据：`security-browser-final.json`、`apple-redesign-report.json`、`security-lifecycle-local.json`、`apple-fixture-report.json`、`homepage-modules-report.json`、`security-fixture-build.json`、`security-inventory-{before,local}.json`。机器上的浏览器脚本仍在仓库外 `work/`，未给网站添加测试依赖。
+- 非通过/边界：全仓只读 Biome CI 仍有格式/导入顺序等历史基线问题（本次实测 83 errors / 7 warnings；未跑写模式）；新增 7 个脚本/工具模块独立 biome lint 通过。Browserslist 基线告警随兼容数据更新消失；中文 Pagefind stemming 提示保留。安全 fixture 早期测试因过于宽泛的字符串断言误把已引用的 meta 属性当脚本失败，已改为实际解析 JSON-LD/HTML 并重跑；另一次完整 fixture 测试超时，延长后通过，均不计初次为通过。
+- 本轮只测本机 Chromium / CDP 触屏，不冒称真实 iOS/Android、Safari/Firefox 或独立渗透测试通过；外站登录/播放未测，后台接口不适用。凭据扫描为模式检查（当前文件、全部可达历史文本差异、产物），不是对不可达历史对象/所有潜在密钥格式的证明。
+
+### 发布与回退（发布后补证）
+
+- 当次用户已明确授权验证后推送并更新网站。发布前基线 Git 为 `fa97e42`，现有 Worker 上一版为 `b3947f8c-ba91-4bd3-a39c-e87db0a1f31c`（实际 deployments list 核对）。
+- 若发布后回归失败，可对现有 fuwari 执行 `wrangler rollback b3947f8c-ba91-4bd3-a39c-e87db0a1f31c`；回退会恢复该版没有新增安全头/HTTP 308 的行为。源码回退应从已保留提交另建修复，不 reset 丢弃后续工作。
+- 正式域名验证与新部署版本待实际发布后填写，不将上面本地通过扩大为线上通过。

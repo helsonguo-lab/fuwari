@@ -3,11 +3,14 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl, getTagUrl } from "@utils/url-utils.ts";
 
-// // Retrieve posts and sort them by publication date
+// One visibility gate for lists, RSS, detail routes, categories and tags.
+function visiblePost({ data }: CollectionEntry<"posts">): boolean {
+	return !import.meta.env.PROD || data.draft !== true;
+}
+
+// Retrieve posts and sort them by publication date.
 async function getRawSortedPosts() {
-	const allBlogPosts = await getCollection("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getCollection("posts", visiblePost);
 
 	const sorted = allBlogPosts.sort((a, b) => {
 		const dateA = new Date(a.data.published);
@@ -53,11 +56,9 @@ export type Tag = {
 };
 
 export async function getTagList(): Promise<Tag[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getCollection("posts", visiblePost);
 
-	const countMap: { [key: string]: number } = {};
+	const countMap: Record<string, number> = Object.create(null);
 	const researchOnly = new Map<string, boolean>();
 	allBlogPosts.forEach((post) => {
 		post.data.tags.forEach((tag: string) => {
@@ -89,9 +90,7 @@ export type Category = {
 };
 
 export async function getCategoryList(): Promise<Category[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getCollection("posts", visiblePost);
 	const count: { [key: string]: number } = { 线下: 0, 生日: 0, 科研手记: 0 };
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
 		if (!post.data.category) {
