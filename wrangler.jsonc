@@ -1,8 +1,11 @@
 {
   "name": "fuwari",
+  "main": "worker/index.ts",
   "account_id": "4188549aa7ba3749406191753b508cab",
   "compatibility_date": "2026-10-12",
   "assets": {
+    "binding": "ASSETS",
+    "run_worker_first": true,
     "directory": "./dist",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"

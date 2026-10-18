@@ -5,7 +5,7 @@ const blankToUndefined = (value: unknown) => value == null ? undefined : typeof 
 const optionalText = z.preprocess(blankToUndefined, z.string().optional());
 const text = z.string().trim().min(1, "请填写非空文字");
 const localImage = text.refine(
-	(value) => /^\/(photos|images)\/[^?#\\\u0000-\u001f]+$/.test(value) && !value.split("/").includes(".."),
+	(value) => /^\/(photos|images)\/[^%?#\\\u0000-\u0020]+$/.test(value) && !value.slice(1).split("/").some((part) => part === "." || part === ".." || !part),
 	"图片须使用 public 下的 /photos/ 或 /images/ 本地路径",
 );
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期须为带引号的 YYYY-MM-DD")

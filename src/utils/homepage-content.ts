@@ -1,6 +1,7 @@
 import { getCollection } from "astro:content";
 import { createRequire } from "node:module";
-import { resolve } from "node:path";
+import { realpath } from "node:fs/promises";
+import { isAbsolute, relative, resolve } from "node:path";
 import MarkdownIt from "markdown-it";
 import sanitizeHtml from "sanitize-html";
 import sharp from "sharp";
@@ -23,7 +24,12 @@ export interface MemoryContent {
 
 async function imageSize(path: string) {
 	try {
-		const { width, height } = await sharp(resolve(publicRoot, path.slice(1))).metadata();
+		const file = await realpath(resolve(publicRoot, path.slice(1)));
+		const allowedRoot = await realpath(resolve(publicRoot, path.split("/")[1]));
+		const rootWithin = relative(await realpath(publicRoot), allowedRoot);
+		const within = relative(allowedRoot, file);
+		if (rootWithin.startsWith("..") || isAbsolute(rootWithin) || within.startsWith("..") || isAbsolute(within)) throw new Error("图片越界");
+		const { width, height } = await sharp(file).metadata();
 		if (!width || !height) throw new Error("无尺寸");
 		return { width, height };
 	} catch {

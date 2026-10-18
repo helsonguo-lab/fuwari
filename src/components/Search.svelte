@@ -5,13 +5,16 @@ import Icon from "@iconify/svelte";
 import { url } from "@utils/url-utils.ts";
 import { onMount } from "svelte";
 import type { SearchResult } from "@/global";
+import { excerptParts, localSearchUrl, type ExcerptPart } from "@/utils/search-results";
 
 let keywordDesktop = "";
 let keywordMobile = "";
-let result: SearchResult[] = [];
+let result: (SearchResult & { parts: ExcerptPart[] })[] = [];
 let isSearching = false;
 let pagefindLoaded = false;
 let initialized = false;
+let requestId = 0;
+let isDesktopSearch = true;
 
 const fakeResult: SearchResult[] = [
 	{
@@ -32,6 +35,7 @@ const fakeResult: SearchResult[] = [
 ];
 
 const togglePanel = () => {
+	isDesktopSearch = false;
 	const panel = document.getElementById("search-panel");
 	panel?.classList.toggle("float-panel-closed");
 };
@@ -48,9 +52,11 @@ const setPanelVisibility = (show: boolean, isDesktop: boolean): void => {
 };
 
 const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
+	const currentRequest = ++requestId;
 	if (!keyword) {
 		setPanelVisibility(false, isDesktop);
 		result = [];
+		isSearching = false;
 		return;
 	}
 
@@ -75,27 +81,33 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 			console.error("Pagefind is not available in production environment.");
 		}
 
-		result = searchResults;
+		if (currentRequest !== requestId) return;
+		result = searchResults.flatMap((item) => {
+			const safeUrl = localSearchUrl(item.url);
+			return safeUrl ? [{ ...item, url: safeUrl, parts: excerptParts(item.excerpt) }] : [];
+		});
 		setPanelVisibility(result.length > 0, isDesktop);
 	} catch (error) {
+		if (currentRequest !== requestId) return;
 		console.error("Search error:", error);
 		result = [];
 		setPanelVisibility(false, isDesktop);
 	} finally {
-		isSearching = false;
+		if (currentRequest === requestId) isSearching = false;
 	}
 };
 
 onMount(() => {
+	const events = new AbortController();
+	let fallback: ReturnType<typeof setTimeout> | undefined;
 	const initializeSearch = () => {
+		if (initialized) return;
 		initialized = true;
 		pagefindLoaded =
 			typeof window !== "undefined" &&
 			!!window.pagefind &&
 			typeof window.pagefind.search === "function";
 		console.log("Pagefind status on init:", pagefindLoaded);
-		if (keywordDesktop) search(keywordDesktop, true);
-		if (keywordMobile) search(keywordMobile, false);
 	};
 
 	if (import.meta.env.DEV) {
@@ -107,34 +119,31 @@ onMount(() => {
 		document.addEventListener("pagefindready", () => {
 			console.log("Pagefind ready event received.");
 			initializeSearch();
-		});
+		}, { signal: events.signal });
 		document.addEventListener("pagefindloaderror", () => {
 			console.warn(
 				"Pagefind load error event received. Search functionality will be limited.",
 			);
 			initializeSearch(); // Initialize with pagefindLoaded as false
-		});
+		}, { signal: events.signal });
 
 		// Fallback in case events are not caught or pagefind is already loaded by the time this script runs
-		setTimeout(() => {
+		fallback = setTimeout(() => {
 			if (!initialized) {
 				console.log("Fallback: Initializing search after timeout.");
 				initializeSearch();
 			}
 		}, 2000); // Adjust timeout as needed
 	}
+	return () => {
+		events.abort();
+		clearTimeout(fallback);
+		requestId++;
+	};
 });
 
-$: if (initialized && keywordDesktop) {
-	(async () => {
-		await search(keywordDesktop, true);
-	})();
-}
-
-$: if (initialized && keywordMobile) {
-	(async () => {
-		await search(keywordMobile, false);
-	})();
+$: if (initialized) {
+	void search(isDesktopSearch ? keywordDesktop : keywordMobile, isDesktopSearch);
 }
 </script>
 
@@ -144,7 +153,7 @@ $: if (initialized && keywordMobile) {
       dark:bg-white/5 dark:hover:bg-white/10 dark:focus-within:bg-white/10
 ">
     <Icon icon="material-symbols:search" class="absolute text-[1.25rem] pointer-events-none ml-3 transition my-auto text-black/30 dark:text-white/30"></Icon>
-    <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:focus={() => search(keywordDesktop, true)}
+    <input placeholder="{i18n(I18nKey.search)}" bind:value={keywordDesktop} on:input={() => isDesktopSearch = true} on:focus={() => { isDesktopSearch = true; void search(keywordDesktop, true); }}
            class="transition-all pl-10 text-sm bg-transparent outline-0
          h-full w-40 active:w-60 focus:w-60 text-black/50 dark:text-white/50"
     >
@@ -181,7 +190,7 @@ left-3 right-3 md:left-[unset] shadow-2xl rounded-2xl p-2" inert aria-hidden="tr
                 {item.meta.title}<Icon icon="fa6-solid:chevron-right" class="transition text-[0.75rem] translate-x-1 my-auto text-[var(--primary)]"></Icon>
             </div>
             <div class="transition text-sm text-50">
-                {@html item.excerpt}
+                {#each item.parts as part}{#if part.highlight}<mark>{part.text}</mark>{:else}{part.text}{/if}{/each}
             </div>
         </a>
     {/each}
