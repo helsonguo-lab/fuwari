@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import { photos } from "../data/photos";
 import { url } from "../utils/url-utils";
 ---
@@ -6,9 +7,13 @@ import { url } from "../utils/url-utils";
   <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">JUNNIE’S JOURNAL ✦</p>
   <h1 class="text-3xl md:text-4xl font-bold text-90 leading-snug">欢迎来到Junnie的个人主页</h1>
   <p class="text-60 leading-7 mt-4 max-w-xl">这里记录追星和科研日常</p>
-  <div class="flex flex-wrap gap-3 mt-6">
-    <a href={url('/gallery/')} class="apple-btn apple-btn-glass">看看我的线下返图</a>
-    <a href={url('/research/')} class="apple-btn apple-btn-glass">打开科研手记</a>
+  <div class="apple-link-row">
+    <a href={url('/gallery/')} class="apple-link">看看我的线下返图
+      <Icon name="material-symbols:chevron-right-rounded" class="apple-chevron" aria-hidden="true"></Icon>
+    </a>
+    <a href={url('/research/')} class="apple-link">打开科研手记
+      <Icon name="material-symbols:chevron-right-rounded" class="apple-chevron" aria-hidden="true"></Icon>
+    </a>
   </div>
 </section>
 <section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
@@ -22,61 +27,47 @@ import { url } from "../utils/url-utils";
   ))}
 </section>
 <style>
-  /* Apple-style pill buttons: SF-like type, 980px radius and a glass secondary. */
-  .apple-btn {
+  /* Apple-style inline links: quiet 15px accent text with a small chevron,
+     like the "Learn more" links on apple.com. Kept at a 44px tap height. */
+  .apple-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1.75rem;
+    margin-top: 1.25rem;
+  }
+  .apple-link {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: .3rem;
     min-height: 2.75rem;
-    padding: 0 1.25rem;
-    border-radius: 980px;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: .9375rem;
     font-weight: 500;
     letter-spacing: -.01em;
     line-height: 1;
     white-space: nowrap;
+    color: var(--primary);
     text-decoration: none;
     -webkit-tap-highlight-color: transparent;
-    transition: background-color .2s ease, box-shadow .2s ease, color .2s ease, transform .2s cubic-bezier(.25, .1, .25, 1);
+    transition: color .2s ease, opacity .2s ease;
   }
-  .apple-btn:active { transform: scale(.97); }
-  .apple-btn:focus-visible {
+  .apple-link :global(.apple-chevron) {
+    font-size: 1.125rem;
+    transition: transform .2s cubic-bezier(.25, .1, .25, 1);
+  }
+  .apple-link:hover { color: var(--title-active); }
+  .apple-link:hover :global(.apple-chevron) { transform: translateX(2px); }
+  .apple-link:active { opacity: .55; }
+  .apple-link:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
-  }
-  .apple-btn-glass {
-    color: var(--btn-content);
-    background-color: rgb(255 255 255 / 55%);
-    border: 1px solid rgb(255 255 255 / 65%);
-    box-shadow: 0 1px 2px rgb(54 82 101 / 8%), inset 0 1px 0 rgb(255 255 255 / 55%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
-  }
-  .apple-btn-glass:hover { background-color: rgb(255 255 255 / 75%); }
-  .apple-btn-glass:active { background-color: rgb(245 250 255 / 85%); }
-  :global(.dark) .apple-btn-glass {
-    color: #eaf3fa;
-    background-color: rgb(38 58 74 / 55%);
-    border-color: rgb(214 232 244 / 18%);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 25%), inset 0 1px 0 rgb(214 232 244 / 12%);
-  }
-  :global(.dark) .apple-btn-glass:hover { background-color: rgb(48 72 91 / 65%); }
-  :global(.dark) .apple-btn-glass:active { background-color: rgb(58 84 105 / 75%); }
-
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    .apple-btn-glass { background-color: var(--card-bg); }
-  }
-  @media (prefers-reduced-transparency: reduce) {
-    .apple-btn-glass {
-      background-color: var(--card-bg);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
+    border-radius: .375rem;
   }
   @media (prefers-reduced-motion: reduce) {
-    .apple-btn { transition: none; }
-    .apple-btn:active { transform: none; }
+    .apple-link { transition: none; }
+    .apple-link :global(.apple-chevron) { transition: none; }
+    .apple-link:hover :global(.apple-chevron) { transform: none; }
   }
 
   .group-card { transition: transform .2s, box-shadow .2s; }
