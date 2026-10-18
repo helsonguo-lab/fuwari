@@ -56,16 +56,45 @@ export const photos: FanPhoto[] = [
 - 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。
 - 关于页面：src/content/spec/about.md
 - 科研手记入口：src/pages/research.astro，按 category 自动收录；旧收藏入口重定向至科研手记。
-- 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify、Threads、Instagram 均为 40×40 纯图标按钮；点击 Spotify 直接打开“我的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
+- 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify、Threads、Instagram 均为 44×44 纯图标按钮；点击 Spotify 直接打开“我喜欢的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
 - 社交账号配置：src/data/social.ts；Threads、Instagram 直接在新标签页打开个人主页，Spotify 采用上述专辑弹层。
-- 浅蓝毛玻璃配色与背景延伸：src/styles/baby-blue.css；页面使用浅蓝白色、淡紫渐变，顶部插图底部渐隐衔接，支持深色模式。原波点样式已移除。
+- 浅蓝配色与背景延伸：src/styles/baby-blue.css；页面使用浅蓝白色、淡紫渐变，顶部插图底部渐隐衔接，支持深色模式。首页使用 `surface-home` 稳定表面，玻璃材质集中在导航、菜单和弹层；内页沿用原卡片。原波点样式已移除。
 - 顶部背景：public/images/background-3600.webp，由用户提供的 background-3600.png 生成 3600×3600 WebP 副本；原图保持不变。主题色已固定，历史浏览器配色不会覆盖新版主题。
 - 首页标题为“欢迎来到Junnie的个人主页”，描述为“这里记录追星和科研日常”。原欢迎文章已删除；没有手记时首页仍显示欢迎区、团体卡片和追星地图。
 - 追星地图：src/components/FanMap.astro 与 src/data/fan-map.ts；照片与场次通过 photos.ts 中的 eventId 关联。
 
+## 首页布局（2026-10-18 手机优先改版）
+
+首页已按 `docs/需求文档.md` 改为手机优先的单列 Apple 风格布局，内页继续保留原侧栏、分类、标签和目录。
+
+### 页面顺序
+
+第一页：欢迎区（玉桂狗短插画 + 紧凑身份 / 欢迎语 / 两个入口 / 社交）→ 近况便签 → IVE / NMIXX 双卡 → 追星地图 → 文章列表 → 分页 →「分类与标签」折叠区 → 页脚。
+
+第二页及以后：`layout="home-list"`，只显示文章、分页、「分类与标签」和页脚，不重复首屏模块、不显示侧栏。第一页判断、分页数据与文章排序不变。
+
+### 布局状态与组件
+
+- `src/pages/[...page].astro` 通过 `MainGridLayout layout="home|home-list"` 切换首页布局；内页不传 `layout`，保持默认双列侧栏。
+- `MainGridLayout.astro` 把 `SideBar` 放进 `main#swup-container`，所以 Swup 站内切换时首页 / 内页的侧栏会一起替换；`#main-grid[data-layout]` 提供布局标记，`Layout.astro` 在 `page:view` 读取并同步 `body.layout-home` / `body.layout-home-list`。
+- 首页首屏使用 `FanWelcome.astro`：`Profile compact` 只显示头像 / 名称 / 简介，社交入口由 `ProfileLinks.astro` 统一提供；`MemoryStack.astro` 仍只在有正式回忆时渲染。
+- `HomepageNow.astro`、`FanGroups.astro`、`FanMap.astro`、`PostCard.astro`、`Footer.astro` 使用稳定的 `surface-home` 表面，不再叠加大量毛玻璃；玻璃只集中在导航、菜单和既有弹层。
+- `HomeArchiveDetails.astro` 在分页后提供原生 `<details>`「分类与标签」；`Categories.astro` / `Tags.astro` 新增 `compact` 形态，仍读取原分类 / 标签数据。
+- 首页近况、双卡、地图、文章和「分类与标签」共享同一对齐线；文章卡片外框与地图同宽，正文在卡片内部限宽，避免长行阅读。
+- `Navbar.astro` / `NavMenuPanel.astro` / `LightDarkSwitch.svelte`：手机导航高 56px，首页固定可见；主题切换放在手机菜单内，支持浅色 / 深色 / 跟随系统；搜索和菜单互斥，关闭态使用 `inert` 且不可 Tab 聚焦。桌面 ≥1024px 显示导航链接。
+- `PostCard.astro` / `PostMeta.astro`：首页文章为紧凑行式卡片，标题、摘要、元数据和字数保留，箭头独立显示，不会盖住长标题；分页按钮为 44px 触控目标。
+- 首页 banner 由同一张 `/images/background-3600.webp` 缩短为插画带，不重复加载第二张大图；首页第 2 页隐藏该插画带。
+
+### 验证与证据
+
+- `pnpm check`：0 errors、1 个既有 `_cssVar` hint。
+- `pnpm build`：6 个页面，Pagefind 索引 5 个页面。
+- 浏览器矩阵与交互检查：`work/check-apple-redesign.mjs`；隔离分页 / 回忆检查：`work/check-apple-fixture.mjs`。截图和报告在 `outputs/mobile-apple-*.png`、`outputs/apple-redesign-report.json`、`outputs/apple-fixture-report.json`。
+- 正式回忆仍为草稿，未为本次改版虚构内容；真实照片与情绪文案到齐后再按原流程启用。
+
 ## 首页近况与精选回忆
 
-模块只出现在首页第一页，顺序：欢迎语与入口 → 近况便签 → IVE / NMIXX → 地图 → 文章。欢迎区与团体卡片已拆分为 `FanWelcome.astro` / `FanGroups.astro`。
+模块只出现在首页第一页，顺序：欢迎区（身份 / 入口 / 社交）→ 近况便签 → IVE / NMIXX → 追星地图 → 文章 → 分页 →「分类与标签」。欢迎区与团体卡片已拆分为 `FanWelcome.astro` / `FanGroups.astro`。
 
 ### 日常近况：直接编辑 Markdown
 

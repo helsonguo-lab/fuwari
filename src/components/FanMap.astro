@@ -80,12 +80,12 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
 ---
 
 <fan-map>
-  <section class="card-base p-6 md:p-9 mb-4" aria-labelledby="fan-map-title">
+  <section class="surface-home map-card mb-4" aria-labelledby="fan-map-title">
     <div class="map-head">
       <div>
-        <p class="text-xs tracking-[.2em] text-[var(--primary)] font-bold mb-3">MY STARRY MAP ✦</p>
-        <h2 id="fan-map-title" class="text-2xl md:text-3xl font-bold text-90">追星地图</h2>
-        <p class="text-60 leading-7 mt-3 max-w-xl">与你们的记忆</p>
+        <p class="map-kicker">MY STARRY MAP ✦</p>
+        <h2 id="fan-map-title">追星地图</h2>
+        <p class="map-copy">与你们的记忆</p>
       </div>
       <div class="map-side">
         <p class="map-stats" aria-label={`${showCount} 场演出，${cityCount} 座城市`}>
@@ -130,6 +130,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
           aria-haspopup="dialog"
           aria-controls={`fan-map-dialog-${marker.id}`}
           aria-label={`${marker.group}，${marker.venue}，${formatDates(marker.dates)}${marker.photo ? "，查看现场照片" : "，照片敬请期待"}`}
+          data-map-trigger
         >
           <svg viewBox="0 0 34 46" class="pin-shape" aria-hidden="true">
             <path class="pin-body" d="M17 0C7.6 0 0 7.6 0 17c0 12.9 17 29 17 29s17-16.1 17-29C34 7.6 26.4 0 17 0Z" />
@@ -140,6 +141,18 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
             <span class="pin-city">{marker.city}</span>
             <span class="pin-date">{formatDates(marker.dates)}</span>
           </span>
+        </button>
+      ))}
+    </div>
+
+    <div class="map-event-list" aria-label="场次快捷入口">
+      {markers.map(marker => (
+        <button type="button" class="map-event-chip" data-map-trigger aria-haspopup="dialog"
+                aria-controls={`fan-map-dialog-${marker.id}`}
+                aria-label={`打开 ${marker.group} ${marker.city} ${formatDates(marker.dates)} 场次详情`}>
+          <i class:list={["legend-dot", marker.group.toLowerCase()]} aria-hidden="true"></i>
+          <span>{marker.city}</span>
+          <span class="chip-date">{formatDates(marker.dates)}</span>
         </button>
       ))}
     </div>
@@ -155,7 +168,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
           <p class="dialog-meta">{formatDates(marker.dates)} · {marker.venue}</p>
         </div>
         <form method="dialog">
-          <button aria-label="关闭场次详情" class="btn-plain rounded-full w-10 h-10 shrink-0" autofocus>
+          <button aria-label="关闭场次详情" class="btn-plain rounded-full w-11 h-11 shrink-0" autofocus>
             <svg viewBox="0 0 24 24" class="w-6 h-6 mx-auto" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </form>
@@ -191,12 +204,19 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
       this.events = new AbortController();
       const { signal } = this.events;
 
-      this.querySelectorAll<HTMLButtonElement>("button.pin").forEach(trigger => {
+      this.querySelectorAll<HTMLButtonElement>("[data-map-trigger]").forEach(trigger => {
         const dialog = this.querySelector<HTMLDialogElement>(`#${trigger.getAttribute("aria-controls")}`);
         if (!dialog) return;
+        const triggers = [...this.querySelectorAll<HTMLButtonElement>(`[aria-controls="${dialog.id}"]`)];
 
-        trigger.addEventListener("click", () => dialog.showModal(), { signal });
-        dialog.addEventListener("close", () => trigger.focus({ preventScroll: true }), { signal });
+        trigger.addEventListener("click", () => {
+          dialog.dataset.lastTriggerIndex = String(triggers.indexOf(trigger));
+          dialog.showModal();
+        }, { signal });
+        dialog.addEventListener("close", () => {
+          const index = Number(dialog.dataset.lastTriggerIndex ?? "-1");
+          triggers[index]?.focus({ preventScroll: true });
+        }, { signal });
         dialog.addEventListener("click", event => {
           if (event.target !== dialog) return;
           const box = dialog.getBoundingClientRect();
@@ -216,12 +236,16 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
 
 <style>
   fan-map { display: block; }
-  .map-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-  .map-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-  .map-stats { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--btn-content); font-size: 12px; }
-  .map-stats strong { font-size: 17px; line-height: 1; color: var(--primary); }
-  .stats-divider { width: 1px; height: 16px; background: color-mix(in srgb, var(--btn-content) 22%, transparent); }
-  .map-legend { display: flex; gap: 14px; font-size: 11px; color: var(--btn-content); letter-spacing: .05em; }
+  .map-card { padding: 18px 20px 17px; color: var(--home-ink); }
+  .map-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .map-kicker { margin-bottom: 5px; color: var(--primary); font-size: 10px; font-weight: 700; letter-spacing: .18em; }
+  .map-head h2 { font-size: 22px; font-weight: 700; line-height: 1.2; letter-spacing: -.015em; }
+  .map-copy { margin-top: 5px; color: var(--home-muted); font-size: 14px; }
+  .map-side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .map-stats { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--home-line); background: color-mix(in srgb, var(--card-bg) 60%, transparent); color: var(--home-muted); font-size: 11px; }
+  .map-stats strong { font-size: 15px; line-height: 1; color: var(--primary); }
+  .stats-divider { width: 1px; height: 14px; background: color-mix(in srgb, var(--btn-content) 20%, transparent); }
+  .map-legend { display: flex; gap: 12px; font-size: 10px; color: var(--home-muted); letter-spacing: .04em; }
   .map-legend > span { display: inline-flex; align-items: center; gap: 5px; }
   .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; flex: none; }
   .legend-dot.ive { background: #dc6f9f; }
@@ -230,11 +254,12 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   .map-frame {
     position: relative;
     width: 100%;
+    max-width: 900px;
     aspect-ratio: 1000 / 700;
-    margin-top: 22px;
-    border-radius: 20px;
+    margin: 16px auto 0;
+    border-radius: 16px;
     overflow: hidden;
-    border: 1px solid color-mix(in srgb, var(--primary) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary) 12%, transparent);
     background: linear-gradient(155deg, #e9f6fd 0%, #d8ecf7 52%, #e9f3fb 100%);
   }
   .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -246,8 +271,8 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
 
   .pin {
     position: absolute;
-    width: 34px;
-    height: 46px;
+    width: 44px;
+    height: 54px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -258,8 +283,8 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     -webkit-tap-highlight-color: transparent;
   }
   .pin:hover { transform: translate(-50%, -100%) translateY(-3px); }
-  .pin:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 8px; }
-  .pin-shape { display: block; width: 100%; height: 100%; filter: drop-shadow(0 4px 7px rgb(42 68 89 / 22%)); }
+  .pin:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 10px; }
+  .pin-shape { position: absolute; bottom: 0; left: 5px; display: block; width: 34px; height: 46px; filter: drop-shadow(0 4px 7px rgb(42 68 89 / 22%)); }
   .pin-ive { --pin-color: #dc6f9f; --pin-dot: #b44f7c; }
   .pin-nmixx { --pin-color: #5a86b4; --pin-dot: #3f678f; }
   .pin-body { fill: var(--pin-color); }
@@ -273,18 +298,34 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     align-items: baseline;
     gap: 4px;
     padding: 3px 8px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--home-line);
     border-radius: 999px;
-    background: var(--glass-bg);
-    box-shadow: 0 4px 12px rgb(64 95 115 / 12%);
-    color: var(--btn-content);
+    background: color-mix(in srgb, var(--card-bg) 88%, transparent);
+    box-shadow: 0 4px 12px rgb(64 95 115 / 10%);
+    color: var(--home-ink);
     white-space: nowrap;
     line-height: 1.2;
-    backdrop-filter: blur(8px);
     pointer-events: none;
   }
   .pin-city { font-size: 11px; font-weight: 700; letter-spacing: .06em; }
   .pin-date { font-size: 9px; opacity: .66; }
+
+  .map-event-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .map-event-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--btn-regular-bg);
+    color: var(--btn-content);
+    font-size: 12px;
+    transition: background-color .16s ease;
+  }
+  .map-event-chip:hover { background: var(--btn-regular-bg-hover); }
+  .map-event-chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .chip-date { color: var(--home-muted); font-size: 11px; }
 
   .map-dialog {
     /* Explicit fixed positioning keeps the dialog centered in the visual viewport
@@ -305,6 +346,7 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   }
   .map-dialog::backdrop { background: rgb(22 38 51 / 32%); backdrop-filter: blur(7px); }
   .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .dialog-head form button { width: 44px; height: 44px; }
   .dialog-kicker { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .14em; opacity: .72; }
   .dialog-title { margin-top: 7px; font-size: 1.1rem; font-weight: 700; line-height: 1.45; }
   .dialog-meta { margin-top: 7px; font-size: 12px; opacity: .68; }
@@ -326,17 +368,22 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
   :global(.dark) .anchor-dot { fill: #8ca9bc; }
   :global(.dark) .pin-ive { --pin-color: #eb92b7; --pin-dot: #c8658f; }
   :global(.dark) .pin-nmixx { --pin-color: #86aed4; --pin-dot: #5d86ab; }
-  :global(.dark) .pin-label { background: rgb(29 46 59 / 82%); }
+  :global(.dark) .pin-label { background: rgb(29 46 59 / 86%); }
 
   @media (max-width: 639px) {
+    .map-card { padding: 16px 16px 15px; }
     .map-head { align-items: flex-start; }
+    .map-head h2 { font-size: 22px; }
     .map-side { width: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
-    .map-stats { padding: 5px 12px; font-size: 11px; }
-    .map-stats strong { font-size: 15px; }
-    .map-frame { margin-top: 16px; border-radius: 16px; }
-    .pin { width: 28px; height: 38px; }
+    .map-stats { padding: 4px 10px; font-size: 10px; }
+    .map-stats strong { font-size: 14px; }
+    .map-frame { margin-top: 13px; border-radius: 14px; }
+    .pin { width: 44px; height: 50px; }
+    .pin-shape { height: 42px; width: 31px; left: 6.5px; }
     .pin-label { display: none; }
     .geo-labels { display: none; }
+    .map-event-list { gap: 6px; }
+    .map-event-chip { min-height: 44px; padding-inline: 10px; }
     .map-dialog {
       width: calc(100vw - 24px);
       max-height: calc(100vh - 24px);
@@ -345,5 +392,17 @@ const landPaths = `<path class="land" data-country="Russia" d="M847.4 0L822.7 26
     }
     .dialog-title { font-size: 1rem; }
     .dialog-photo img { max-height: 46vh; max-height: 46svh; }
+  }
+  @media (min-width: 768px) {
+    .map-card { padding: 22px 26px 21px; }
+    .map-head h2 { font-size: 28px; }
+    .map-copy { font-size: 15px; }
+  }
+  @media (min-width: 1024px) {
+    .map-event-list { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pin, .pin:hover, .map-event-chip { transition: none; }
+    .pin:hover { transform: translate(-50%, -100%); }
   }
 </style>

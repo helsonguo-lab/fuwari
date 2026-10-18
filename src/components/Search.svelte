@@ -151,14 +151,14 @@ $: if (initialized && keywordMobile) {
 </div>
 
 <!-- toggle btn for phone/tablet view -->
-<button on:click={togglePanel} aria-label="Search Panel" id="search-switch"
+<button on:click={togglePanel} aria-label="搜索" aria-expanded="false" aria-controls="search-panel" id="search-switch"
         class="btn-plain scale-animation lg:!hidden rounded-lg w-11 h-11 active:scale-90">
     <Icon icon="material-symbols:search" class="text-[1.25rem]"></Icon>
 </button>
 
 <!-- search panel -->
-<div id="search-panel" class="float-panel float-panel-closed search-panel absolute md:w-[30rem]
-top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
+<div id="search-panel" class="float-panel float-panel-closed search-panel fixed md:w-[30rem]
+left-3 right-3 md:left-[unset] shadow-2xl rounded-2xl p-2" inert aria-hidden="true">
 
     <!-- search bar inside panel for phone/tablet -->
     <div id="search-bar-inside" class="flex relative lg:hidden transition-all items-center h-11 rounded-xl
@@ -192,7 +192,14 @@ top-20 left-4 md:left-[unset] right-4 shadow-2xl rounded-2xl p-2">
     outline: 0;
   }
   .search-panel {
+    top: calc(3.5rem + env(safe-area-inset-top) + .5rem);
     max-height: calc(100vh - 100px);
+    max-height: calc(100svh - 100px);
     overflow-y: auto;
+    background-color: color-mix(in srgb, var(--card-bg) 94%, transparent);
+  }
+  #search-bar-inside { height: 44px; }
+  @media (min-width: 1024px) {
+    .search-panel { top: 5.25rem; }
   }
 </style>

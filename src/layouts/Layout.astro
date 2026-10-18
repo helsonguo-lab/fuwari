@@ -21,7 +21,7 @@ import {
 } from "../constants/constants";
 import { defaultFavicons } from "../constants/icon";
 import type { Favicon } from "../types/config";
-import { pathsEqual, url } from "../utils/url-utils";
+import { url } from "../utils/url-utils";
 import "katex/dist/katex.css";
 
 interface Props {
@@ -30,14 +30,10 @@ interface Props {
 	description?: string;
 	lang?: string;
 	setOGTypeArticle?: boolean;
+	layout?: "default" | "home" | "home-list";
 }
 
-let { title, banner, description, lang, setOGTypeArticle } = Astro.props;
-
-// apply a class to the body element to decide the height of the banner, only used for initial page load
-// Swup can update the body for each page visit, but it's after the page transition, causing a delay for banner height change
-// so use Swup hooks instead to change the height immediately when a link is clicked
-const isHomePage = pathsEqual(Astro.url.pathname, url("/"));
+let { title, banner, description, lang, setOGTypeArticle, layout = "default" } = Astro.props;
 
 // defines global css variables
 // why doing this in Layout instead of GlobalStyles: https://github.com/withastro/astro/issues/6728#issuecomment-1502203757
@@ -154,7 +150,11 @@ const bannerOffset =
 		<link rel="alternate" type="application/rss+xml" title={profileConfig.name} href={`${Astro.site}rss.xml`}/>
 
 	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
+	<body class=" min-h-screen transition " class:list={[{
+		"layout-home": layout === "home",
+		"layout-home-list": layout === "home-list",
+		"enable-banner": enableBanner,
+	}]}
 		  data-overlayscrollbars-initialize
 	>
 		<ConfigCarrier></ConfigCarrier>
@@ -169,33 +169,78 @@ const bannerOffset =
 	bannerOffset,
 	'banner-height-home': `${BANNER_HEIGHT_HOME}vh`,
 	'banner-height': `${BANNER_HEIGHT}vh`,
+	'banner-extend': `${BANNER_HEIGHT_EXTEND}vh`,
 }}>
 @tailwind components;
 @layer components {
-	.enable-banner.is-home #banner-wrapper {
-		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
-	}
 	.enable-banner #banner-wrapper {
-		@apply h-[var(--banner-height-home)]
+		@apply h-[var(--banner-height-home)];
+		top: calc(-1 * var(--banner-extend));
 	}
 
-	.enable-banner.is-home #banner {
-		@apply h-[var(--banner-height-home)] translate-y-0
-	}
 	.enable-banner #banner {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--bannerOffset)]
-	}
-	.enable-banner.is-home #main-grid {
-		@apply translate-y-[var(--banner-height-extend)];
 	}
 	.enable-banner #top-row {
 		@apply h-[calc(var(--banner-height-home)_-_4.5rem)] transition-all duration-300
 	}
-	.enable-banner.is-home #sidebar-sticky {
-		@apply top-[calc(1rem_-_var(--banner-height-extend))]
-	}
 	.navbar-hidden {
 		@apply opacity-0 -translate-y-16
+	}
+}
+
+/* Home layout: the banner becomes a short illustration band and the content
+   follows it in normal document flow. No sidebar is rendered on home pages. */
+.layout-home #top-row,
+.layout-home-list #top-row {
+	height: calc(56px + env(safe-area-inset-top));
+}
+
+/* Home navigation stays visible while scrolling. The top row remains in flow
+   as a spacer so the illustration band still starts below the header. */
+.layout-home #navbar-wrapper,
+.layout-home-list #navbar-wrapper {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 50;
+}
+
+.layout-home #banner-wrapper {
+	position: relative;
+	top: 0;
+	height: clamp(112px, 15vw, 176px);
+	transform: none;
+}
+
+.layout-home #banner {
+	height: 100%;
+	transform: none;
+}
+
+.layout-home-list #banner-wrapper {
+	display: none;
+}
+
+.layout-home .main-shell,
+.layout-home-list .main-shell {
+	position: static;
+}
+
+.layout-home #main-grid,
+.layout-home-list #main-grid {
+	transform: none;
+	width: 100%;
+	max-width: 1080px;
+	margin-inline: auto;
+	padding-inline: clamp(16px, 4.6vw, 24px);
+}
+
+@media (min-width: 1024px) {
+	.layout-home #top-row,
+	.layout-home-list #top-row {
+		height: 72px;
 	}
 }
 </style>
@@ -213,7 +258,6 @@ import {getHue, getStoredTheme, setHue, setTheme} from "../utils/setting-utils";
 import {pathsEqual, url} from "../utils/url-utils";
 import {
 	BANNER_HEIGHT,
-	BANNER_HEIGHT_HOME,
 	BANNER_HEIGHT_EXTEND,
 	MAIN_PANEL_OVERLAPS_BANNER_HEIGHT
 } from "../constants/constants";
@@ -265,23 +309,117 @@ function disableAnimation() {
 
 const bannerEnabled = !!document.getElementById('banner-wrapper')
 
-function setClickOutsideToClose(panel: string, ignores: string[]) {
+type LayoutMode = "default" | "home" | "home-list";
+
+function layoutForPath(value: string): LayoutMode {
+	try {
+		const path = new URL(value, window.location.href).pathname;
+		if (pathsEqual(path, url("/"))) return "home";
+		if (/^\/\d+\/$/.test(path)) return "home-list";
+	} catch {
+		// keep the current layout for malformed URLs
+	}
+	return "default";
+}
+
+function setLayout(layout: LayoutMode) {
+	document.body.classList.toggle("layout-home", layout === "home");
+	document.body.classList.toggle("layout-home-list", layout === "home-list");
+}
+
+function syncLayoutFromDom() {
+	const marker = document.querySelector<HTMLElement>("#main-grid[data-layout]");
+	const layout = marker?.dataset.layout;
+	if (layout === "home" || layout === "home-list" || layout === "default") {
+		setLayout(layout);
+	}
+	const navbar = document.getElementById("navbar-wrapper");
+	navbar?.classList.remove("navbar-hidden");
+}
+
+function setupPanels() {
+	const panels = [
+		{ panel: "nav-menu-panel", trigger: "nav-menu-switch" },
+		{ panel: "search-panel", trigger: "search-switch" },
+		{ panel: "display-setting", trigger: "display-settings-switch" },
+	];
+	const isOpen = (panel: HTMLElement) => !panel.classList.contains("float-panel-closed");
+	const setOpen = (panel: HTMLElement, open: boolean) => {
+		panel.classList.toggle("float-panel-closed", !open);
+	};
+	const sync = () => {
+		for (const entry of panels) {
+			const panel = document.getElementById(entry.panel);
+			const trigger = document.getElementById(entry.trigger);
+			if (!panel) continue;
+			const open = isOpen(panel);
+			panel.toggleAttribute("inert", !open);
+			panel.setAttribute("aria-hidden", String(!open));
+			trigger?.setAttribute("aria-expanded", String(open));
+		}
+	};
+
+	const observer = new MutationObserver(sync);
+	for (const entry of panels) {
+		const panel = document.getElementById(entry.panel);
+		if (panel) observer.observe(panel, { attributes: true, attributeFilter: ["class"] });
+	}
+
 	document.addEventListener("click", event => {
-		let panelDom = document.getElementById(panel);
-		let tDom = event.target;
-		if (!(tDom instanceof Node)) return;		// Ensure the event target is an HTML Node
-		for (let ig of ignores) {
-			let ie = document.getElementById(ig)
-			if (ie == tDom || (ie?.contains(tDom))) {
-				return;
+		const target = event.target;
+		if (!(target instanceof Element)) return;
+
+		const menuTrigger = target.closest("#nav-menu-switch");
+		const searchTrigger = target.closest("#search-switch");
+		if (menuTrigger) {
+			const menu = document.getElementById("nav-menu-panel");
+			const search = document.getElementById("search-panel");
+			if (menu && search) {
+				setOpen(search, false);
+				setOpen(menu, !isOpen(menu));
 			}
 		}
-		panelDom!.classList.add("float-panel-closed");
+		if (searchTrigger) {
+			const menu = document.getElementById("nav-menu-panel");
+			if (menu) setOpen(menu, false);
+		}
+
+		for (const entry of panels) {
+			const panel = document.getElementById(entry.panel);
+			const trigger = document.getElementById(entry.trigger);
+			if (!panel || !trigger || !isOpen(panel)) continue;
+			if (panel.contains(target) || trigger.contains(target)) continue;
+			setOpen(panel, false);
+		}
+		// The observer will sync the ARIA state after Svelte/other handlers settle.
+		queueMicrotask(sync);
 	});
+
+	document.addEventListener("keydown", event => {
+		if (event.key !== "Escape") return;
+		for (const entry of panels) {
+			const panel = document.getElementById(entry.panel);
+			const trigger = document.getElementById(entry.trigger);
+			if (!panel || !trigger || !isOpen(panel)) continue;
+			setOpen(panel, false);
+			(trigger as HTMLElement).focus({ preventScroll: true });
+		}
+	});
+
+	for (const entry of panels) {
+		document.getElementById(entry.panel)?.querySelectorAll("a").forEach(link => {
+			link.addEventListener("click", () => {
+				if (entry.panel !== "nav-menu-panel") return;
+				const panel = document.getElementById(entry.panel);
+				if (panel) setOpen(panel, false);
+			});
+		});
+	}
+
+	sync();
 }
-setClickOutsideToClose("display-setting", ["display-setting", "display-settings-switch"])
-setClickOutsideToClose("nav-menu-panel", ["nav-menu-panel", "nav-menu-switch"])
-setClickOutsideToClose("search-panel", ["search-panel", "search-bar", "search-switch"])
+
+setupPanels();
 
 
 function loadTheme() {
@@ -382,18 +520,6 @@ function init() {
 init();
 
 const setup = () => {
-	// TODO: temp solution to change the height of the banner
-/*
-	window.swup.hooks.on('animation:out:start', () => {
-		const path = window.location.pathname
-		const body = document.querySelector('body')
-		if (path[path.length - 1] === '/' && !body.classList.contains('is-home')) {
-			body.classList.add('is-home')
-		} else if (path[path.length - 1] !== '/' && body.classList.contains('is-home')) {
-			body.classList.remove('is-home')
-		}
-	})
-*/
 	window.swup.hooks.on('link:click', () => {
 		// Remove the delay for the first time page load
 		document.documentElement.style.setProperty('--content-delay', '0ms')
@@ -402,9 +528,12 @@ const setup = () => {
 		if (!bannerEnabled) {
 			return
 		}
+		if (document.body.classList.contains('layout-home') || document.body.classList.contains('layout-home-list')) {
+			return
+		}
 		let threshold = window.innerHeight * (BANNER_HEIGHT / 100) - 72 - 16
 		let navbar = document.getElementById('navbar-wrapper')
-		if (!navbar || !document.body.classList.contains('lg:is-home')) {
+		if (!navbar) {
 			return
 		}
 		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
@@ -413,13 +542,9 @@ const setup = () => {
 	})
 	window.swup.hooks.on('content:replace', initCustomScrollbar)
 	window.swup.hooks.on('visit:start', (visit: {to: {url: string}}) => {
-		// change banner height immediately when a link is clicked
+		// Change the home/inner shell immediately when a link is clicked.
 		const bodyElement = document.querySelector('body')
-		if (pathsEqual(visit.to.url, url('/'))) {
-			bodyElement!.classList.add('lg:is-home');
-		} else {
-			bodyElement!.classList.remove('lg:is-home');
-		}
+		bodyElement && setLayout(layoutForPath(visit.to.url));
 
 		// increase the page height during page transition to prevent the scrolling animation from jumping
 		const heightExtend = document.getElementById('page-height-extend')
@@ -434,6 +559,9 @@ const setup = () => {
 		}
 	});
 	window.swup.hooks.on('page:view', () => {
+		// Reconcile the shell with the layout marker rendered by the new page.
+		syncLayoutFromDom();
+
 		// hide the temp high element when the transition is done
 		const heightExtend = document.getElementById('page-height-extend')
 		if (heightExtend) {
@@ -488,11 +616,13 @@ function scrollFunction() {
 		const NAVBAR_HEIGHT = 72
 		const MAIN_PANEL_EXCESS_HEIGHT = MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16			// The height the main panel overlaps the banner
 
-		let bannerHeight = BANNER_HEIGHT
-		if (document.body.classList.contains('lg:is-home') && window.innerWidth >= 1024) {
-			bannerHeight = BANNER_HEIGHT_HOME
+		// The home navigation stays visible; only inner pages use the scroll-away nav.
+		if (document.body.classList.contains('layout-home') || document.body.classList.contains('layout-home-list')) {
+			navbar.classList.remove('navbar-hidden')
+			return
 		}
-		let threshold = window.innerHeight * (bannerHeight / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
+
+		let threshold = window.innerHeight * (BANNER_HEIGHT / 100) - NAVBAR_HEIGHT - MAIN_PANEL_EXCESS_HEIGHT - 16
 		if (document.body.scrollTop >= threshold || document.documentElement.scrollTop >= threshold) {
 			navbar.classList.add('navbar-hidden')
 		} else {

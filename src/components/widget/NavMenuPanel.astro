@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import { type NavBarLink } from "../../types/config";
 import { url } from "../../utils/url-utils";
+import LightDarkSwitch from "../LightDarkSwitch.svelte";
 
 interface Props {
 	links: NavBarLink[];
@@ -9,24 +10,57 @@ interface Props {
 
 const links = Astro.props.links;
 ---
-<div id="nav-menu-panel" class:list={["float-panel float-panel-closed absolute transition-all fixed right-4 px-2 py-2"]}>
-    {links.map((link) => (
-        <a href={link.external ? link.url : url(link.url)} class="group flex justify-between items-center py-2 pl-3 pr-1 rounded-lg gap-8
-            hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition
-        "
-           target={link.external ? "_blank" : null}
-        >
-            <div class="transition text-black/75 dark:text-white/75 font-bold group-hover:text-[var(--primary)] group-active:text-[var(--primary)]">
-                {link.name}
-            </div>
-            {!link.external && <Icon name="material-symbols:chevron-right-rounded"
-                  class="transition text-[1.25rem] text-[var(--primary)]"
+<div id="nav-menu-panel" data-nav-panel class:list={["float-panel float-panel-closed fixed right-3 w-[min(19rem,calc(100vw_-_1.5rem))] px-2 py-2 lg:hidden"]}
+     aria-label="站点导航" aria-hidden="true" inert>
+    <nav class="flex flex-col">
+        {links.map((link) => (
+            <a href={link.external ? link.url : url(link.url)} class="group flex justify-between items-center min-h-11 py-2 pl-3 pr-1 rounded-lg gap-8
+                hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)] transition
+            "
+               target={link.external ? "_blank" : null}
             >
-            </Icon>}
-            {link.external && <Icon name="fa6-solid:arrow-up-right-from-square"
-                  class="transition text-[0.75rem] text-black/25 dark:text-white/25 -translate-x-1"
-            >
-            </Icon>}
-        </a>
-    ))}
+                <div class="transition text-black/80 dark:text-white/80 font-semibold group-hover:text-[var(--primary)] group-active:text-[var(--primary)]">
+                    {link.name}
+                </div>
+                {!link.external && <Icon name="material-symbols:chevron-right-rounded"
+                      class="transition text-[1.25rem] text-[var(--primary)]"
+                >
+                </Icon>}
+                {link.external && <Icon name="fa6-solid:arrow-up-right-from-square"
+                      class="transition text-[0.75rem] text-black/25 dark:text-white/25 -translate-x-1"
+                >
+                </Icon>}
+            </a>
+        ))}
+    </nav>
+    <div class="mt-2 border-t border-black/10 dark:border-white/10 px-1 pt-3 pb-1">
+        <p class="px-2 pb-2 text-[11px] font-semibold tracking-[.12em] text-50">主题</p>
+        <LightDarkSwitch client:only="svelte" variant="inline"></LightDarkSwitch>
+    </div>
 </div>
+
+<style>
+    #nav-menu-panel {
+        top: calc(3.5rem + env(safe-area-inset-top) + .5rem);
+        max-height: calc(100svh - 5rem - env(safe-area-inset-top));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        background-color: color-mix(in srgb, var(--card-bg) 94%, transparent);
+        border-color: var(--home-line);
+        -webkit-backdrop-filter: blur(18px) saturate(160%);
+        backdrop-filter: blur(18px) saturate(160%);
+    }
+    #nav-menu-panel nav a {
+        min-height: 44px;
+    }
+    @media (min-width: 1024px) {
+        #nav-menu-panel { display: none; }
+    }
+    @media (prefers-reduced-transparency: reduce) {
+        #nav-menu-panel {
+            background-color: var(--card-bg);
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+        }
+    }
+</style>

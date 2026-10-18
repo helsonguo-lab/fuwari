@@ -7,7 +7,7 @@ import { url } from "../utils/url-utils";
 
 <album-shelf>
   <button type="button" aria-label="查看我喜欢的专辑" title="Spotify" aria-haspopup="dialog" aria-controls="album-covers"
-    class="btn-regular rounded-lg h-10 w-10 active:scale-90" data-spotify-trigger>
+    class="btn-regular rounded-lg h-11 w-11 active:scale-90" data-spotify-trigger>
     <Icon name="fa6-brands:spotify" class="text-[1.5rem]" />
   </button>
 
@@ -15,7 +15,7 @@ import { url } from "../utils/url-utils";
     <div class="album-heading">
       <h2 id="album-covers-title">我喜欢的专辑</h2>
       <form method="dialog">
-        <button aria-label="关闭专辑封面" class="btn-plain rounded-full w-10 h-10" autofocus>
+        <button aria-label="关闭专辑封面" class="btn-plain rounded-full w-11 h-11" autofocus>
           <Icon name="material-symbols:close-rounded" class="text-2xl" />
         </button>
       </form>
@@ -81,6 +81,7 @@ import { url } from "../utils/url-utils";
   }
   .album-dialog::backdrop { background: rgb(22 38 51 / 32%); backdrop-filter: blur(7px); }
   .album-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .album-heading button { width: 44px; height: 44px; flex: none; }
   .album-heading h2 { font-size: 1.125rem; font-weight: 700; }
   .album-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
   .album-grid img { width: 100%; aspect-ratio: 1; height: auto; border-radius: 10px; object-fit: contain; box-shadow: 0 4px 16px #2033441a; }

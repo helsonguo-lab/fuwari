@@ -2,22 +2,47 @@
 import { photos } from "../data/photos";
 import { url } from "../utils/url-utils";
 ---
-<section class="grid sm:grid-cols-2 gap-4 mb-4" aria-label="我的喜欢">
+<section class="group-grid mb-4" aria-label="我的喜欢">
   {[{ name: 'IVE', fandom: 'DIVE', note: '喜欢小圆的第7年', tone: 'ive' }, { name: 'NMIXX', fandom: 'NSWER', note: '220222接生的小啾', tone: 'nmixx' }].map(group => (
-    <a href={url('/gallery/') + '?group=' + group.name} class:list={['group-card card-base p-7', group.tone]}>
-      <p class="text-xs tracking-[.2em] opacity-70">{group.fandom} ♡</p>
-      <h2 class="text-3xl font-bold mt-2 tracking-wide">{group.name} <span class="text-lg float-right" aria-hidden="true">↗</span></h2>
-      <p class="text-sm mt-3 opacity-80">{group.note}</p>
-      <p class="text-xs mt-5 opacity-60">{photos.some(photo => photo.group === group.name) ? photos.filter(photo => photo.group === group.name).length + ' 张现场记忆' : '现场照片 · 整理中'}</p>
+    <a href={url('/gallery/') + '?group=' + group.name} class:list={['group-card surface-home', group.tone]}
+       aria-label={`${group.name}，${group.fandom}，${group.note}`}>
+      <p class="group-fandom">{group.fandom} ♡</p>
+      <h2 class="group-name">{group.name} <span class="group-arrow" aria-hidden="true">↗</span></h2>
+      <p class="group-note">{group.note}</p>
+      <p class="group-count">{photos.some(photo => photo.group === group.name) ? photos.filter(photo => photo.group === group.name).length + ' 张现场记忆' : '现场照片 · 整理中'}</p>
     </a>
   ))}
 </section>
 <style>
-  .group-card { transition: transform .2s, box-shadow .2s; }
-  .group-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px #4868791a; }
-  .ive { background: linear-gradient(120deg, #f7bfd7bf, #fff0f6bf); color: #83445e; }
-  .nmixx { background: linear-gradient(120deg, #f7fbff99, #b5c7d380); color: #405f73; }
-  :global(.dark) .ive { background: linear-gradient(120deg, #73435999, #382631b3); color: #f6d7e5; }
-  :global(.dark) .nmixx { background: linear-gradient(120deg, #1d2e3bb3, #344e6380); color: #d4e4ee; }
-  @media (prefers-reduced-motion: reduce) { .group-card { transition: none; } .group-card:hover { transform: none; } }
+  .group-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .group-card {
+    min-width: 0;
+    padding: 18px 18px 16px;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+  .group-card:active { transform: scale(.99); opacity: .9; }
+  .group-fandom { font-size: 11px; font-weight: 700; letter-spacing: .14em; opacity: .66; }
+  .group-name { margin-top: 4px; font-size: 24px; font-weight: 700; line-height: 1.2; letter-spacing: .01em; }
+  .group-arrow { float: right; font-size: 16px; font-weight: 500; opacity: .7; }
+  .group-note { margin-top: 8px; font-size: 14px; line-height: 1.55; opacity: .82; }
+  .group-count { margin-top: 13px; font-size: 12px; opacity: .62; }
+  .ive { background: linear-gradient(125deg, #f9dce8 0%, #fff3f8 100%); color: #7a4058; }
+  .nmixx { background: linear-gradient(125deg, #e2eef6 0%, #f4f9fc 100%); color: #3e5c70; }
+  :global(.dark) .ive { background: linear-gradient(125deg, #4f3040 0%, #2e222a 100%); color: #f6d7e5; }
+  :global(.dark) .nmixx { background: linear-gradient(125deg, #1d303d 0%, #22323f 100%); color: #d4e4ee; }
+  @media (min-width: 360px) {
+    .group-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .group-card { padding: 20px 20px 18px; }
+    .group-name { font-size: 26px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .group-card { transition: none; }
+    .group-card:active { transform: none; }
+  }
 </style>

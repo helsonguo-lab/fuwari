@@ -1,0 +1,30 @@
+---
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "../../config";
+import AlbumShelf from "../AlbumShelf.astro";
+
+interface Props {
+	class?: string;
+}
+const className = Astro.props.class;
+---
+<div class:list={["profile-links-list", className]}>
+    {profileConfig.links.map(item => item.name === "Spotify" ? <AlbumShelf /> :
+        <a rel="me noopener noreferrer" aria-label={'访问我的 ' + item.name + ' 主页'} title={item.name} href={item.url} target="_blank" class="btn-regular rounded-lg h-11 w-11 active:scale-90">
+            <Icon name={item.icon} class="text-[1.5rem]"></Icon>
+        </a>
+    )}
+</div>
+
+<style>
+    .profile-links-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .profile-links-list > :global(a),
+    .profile-links-list :global([data-spotify-trigger]) {
+        width: 44px;
+        height: 44px;
+    }
+</style>

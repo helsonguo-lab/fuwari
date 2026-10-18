@@ -1,5 +1,4 @@
 ---
-
 import I18nKey from "../../i18n/i18nKey";
 import { i18n } from "../../i18n/translation";
 import { getTagList } from "../../utils/content-utils";
@@ -15,11 +14,23 @@ const isCollapsed = tags.length >= 20;
 interface Props {
 	class?: string;
 	style?: string;
+	compact?: boolean;
 }
 const className = Astro.props.class;
 const style = Astro.props.style;
+const compact = Astro.props.compact ?? false;
 ---
-<WidgetLayout name={i18n(I18nKey.tags)} id="tags" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT} class={className} style={style}>
+{compact ? <section class={className}>
+    <h2 class="compact-widget-title">{i18n(I18nKey.tags)}</h2>
+    <div class="compact-widget-list">
+        {tags.map(t =>
+            <a class="compact-widget-link" href={t.url} aria-label={`View all posts with the ${t.name.trim()} tag`}>
+                <span>{t.name.trim()}</span>
+                <span class="compact-widget-count">{t.count}</span>
+            </a>
+        )}
+    </div>
+</section> : <WidgetLayout name={i18n(I18nKey.tags)} id="tags" isCollapsed={isCollapsed} collapsedHeight={COLLAPSED_HEIGHT} class={className} style={style}>
     <div class="flex gap-2 flex-wrap">
         {tags.map(t => (
             <ButtonTag href={t.url} label={`View all posts with the ${t.name.trim()} tag`}>
@@ -27,4 +38,4 @@ const style = Astro.props.style;
             </ButtonTag>
         ))}
     </div>
-</WidgetLayout>
+</WidgetLayout>}
