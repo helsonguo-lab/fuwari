@@ -71,6 +71,8 @@ const search = async (keyword: string, isDesktop: boolean): Promise<void> => {
 
 		if (import.meta.env.PROD && pagefindLoaded && window.pagefind) {
 			const response = await window.pagefind.search(keyword);
+			// Don't load/parse result fragments for a query that is already obsolete.
+			if (currentRequest !== requestId) return;
 			searchResults = await Promise.all(
 				response.results.map((item) => item.data()),
 			);

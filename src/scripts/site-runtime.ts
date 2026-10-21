@@ -25,19 +25,39 @@ function syncLayout() {
 	if (mode === "default" || mode === "home" || mode === "home-list") setLayout(mode);
 	document.getElementById("navbar-wrapper")?.classList.remove("navbar-hidden");
 }
+let backToTop: HTMLElement | null;
+let tocWrapper: HTMLElement | null;
+let navbarWrapper: HTMLElement | null;
+function toggleScrollClass(element: HTMLElement | null, name: string, enabled: boolean) {
+	if (element && element.classList.contains(name) !== enabled) element.classList.toggle(name, enabled);
+}
 function updateScroll() {
 	const top = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
 	const bannerHeight = innerHeight * BANNER_HEIGHT / 100;
-	document.getElementById("back-to-top-btn")?.classList.toggle("hide", top <= bannerHeight);
-	if (!siteConfig.banner.enable) return;
-	document.getElementById("toc-wrapper")?.classList.toggle("toc-hide", top <= bannerHeight);
 	const isHome = document.body.classList.contains("layout-home") || document.body.classList.contains("layout-home-list");
 	const threshold = bannerHeight - 72 - MAIN_PANEL_OVERLAPS_BANNER_HEIGHT * 16 - 16;
-	document.getElementById("navbar-wrapper")?.classList.toggle("navbar-hidden", !isHome && top >= threshold);
+	toggleScrollClass(backToTop, "hide", top <= bannerHeight);
+	if (!siteConfig.banner.enable) return;
+	toggleScrollClass(tocWrapper, "toc-hide", top <= bannerHeight);
+	toggleScrollClass(navbarWrapper, "navbar-hidden", !isHome && top >= threshold);
 }
 function updateSize() {
 	const offset = Math.floor(innerHeight * BANNER_HEIGHT_EXTEND / 100);
-	document.documentElement.style.setProperty("--banner-height-extend", `${offset - offset % 4}px`);
+	const value = `${offset - offset % 4}px`;
+	if (document.documentElement.style.getPropertyValue("--banner-height-extend") !== value) {
+		document.documentElement.style.setProperty("--banner-height-extend", value);
+	}
+}
+let scrollFrame: number | undefined;
+let sizeChanged = false;
+function scheduleScroll(resized = false) {
+	sizeChanged ||= resized;
+	if (scrollFrame !== undefined) return;
+	scrollFrame = requestAnimationFrame(() => {
+		scrollFrame = undefined;
+		if (sizeChanged) { sizeChanged = false; updateSize(); }
+		updateScroll();
+	});
 }
 
 // Astro bundles this module once for the persistent document. Only page-owned
@@ -58,13 +78,20 @@ function cleanupPage() {
 function initPage() {
 	cleanupPage();
 	syncLayout();
+	// Refresh page references after every Swup replacement, never per scroll event.
+	backToTop = document.getElementById("back-to-top-btn");
+	tocWrapper = document.getElementById("toc-wrapper");
+	navbarWrapper = document.getElementById("navbar-wrapper");
+	// Astro hoists component scripts even when their conditional markup is empty.
+	// Keep the gesture/animation bundle off pages without published memories.
+	if (!customElements.get("memory-stack") && document.querySelector("memory-stack")) void import("./memory-stack");
 	cleanupFormulas = initFormulaScrollbars();
 	cleanupLightbox = createPhotoLightbox();
 	updateScroll();
 }
 initPage();
-window.addEventListener("scroll", updateScroll, { passive: true });
-window.addEventListener("resize", () => { updateSize(); updateScroll(); });
+window.addEventListener("scroll", () => scheduleScroll(), { passive: true });
+window.addEventListener("resize", () => scheduleScroll(true));
 
 let hooksRegistered = false;
 let settleTimer: ReturnType<typeof setTimeout> | undefined;

@@ -6,7 +6,10 @@ const panels = [
 	{ panel: "display-setting", trigger: "display-settings-switch" },
 ];
 const isOpen = (panel: HTMLElement) => !panel.classList.contains("float-panel-closed");
-const setOpen = (panel: HTMLElement, open: boolean) => panel.classList.toggle("float-panel-closed", !open);
+const setOpen = (panel: HTMLElement, open: boolean) => {
+	if (isOpen(panel) !== open) panel.classList.toggle("float-panel-closed", !open);
+};
+const panelSelector = panels.map((entry) => `#${entry.panel}`).join(",");
 
 export function closePanels() {
 	for (const entry of panels) {
@@ -23,12 +26,20 @@ export function setupPanels() {
 			const panel = document.getElementById(entry.panel);
 			if (!panel) continue;
 			const open = isOpen(panel);
-			panel.toggleAttribute("inert", !open);
-			panel.setAttribute("aria-hidden", String(!open));
-			document.getElementById(entry.trigger)?.setAttribute("aria-expanded", String(open));
+			if (panel.hasAttribute("inert") !== !open) panel.toggleAttribute("inert", !open);
+			if (panel.getAttribute("aria-hidden") !== String(!open)) panel.setAttribute("aria-hidden", String(!open));
+			const trigger = document.getElementById(entry.trigger);
+			if (trigger && trigger.getAttribute("aria-expanded") !== String(open)) trigger.setAttribute("aria-expanded", String(open));
 		}
 	};
-	const observer = new MutationObserver(sync);
+	const observer = new MutationObserver((records) => {
+		// Ignore icon/theme/result churn; only panel state or mounting affects ARIA.
+		const changed = records.some((record) => record.type === "attributes"
+			? record.target instanceof Element && record.target.matches(panelSelector)
+			: [...record.addedNodes, ...record.removedNodes].some((node) => node instanceof Element &&
+				(node.matches(panelSelector) || node.querySelector(panelSelector))));
+		if (changed) sync();
+	});
 	const navbar = document.getElementById("navbar");
 	if (navbar) observer.observe(navbar, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
 	document.addEventListener("click", (event) => {
