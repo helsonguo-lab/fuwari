@@ -20,11 +20,14 @@ export function excerptParts(html: string): ExcerptPart[] {
 	return parts;
 }
 
-export function localSearchUrl(value: string): string | undefined {
+export function localSearchUrl(value: string, base = location.href): string | undefined {
 	try {
-		const target = new URL(value, location.href);
-		if (target.origin !== location.origin || !["http:", "https:"].includes(target.protocol) || target.username || target.password) return;
-		return target.pathname + target.search + target.hash;
+		const baseUrl = new URL(base);
+		const target = new URL(value, baseUrl);
+		if (target.origin !== baseUrl.origin || !["http:", "https:"].includes(target.protocol) || target.username || target.password) return;
+		// Return an absolute same-origin URL: a pathname beginning with "//"
+		// would otherwise be interpreted as a protocol-relative host by the browser.
+		return target.href;
 	} catch {
 		return;
 	}

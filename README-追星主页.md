@@ -65,7 +65,9 @@ export const photos: FanPhoto[] = [
 - 浏览器标签页图标：`src/config.ts` 的 `favicon` 配置；蓝粉双色星星原图位于 `public/favicon/blue-pink-star.svg`，另有 32px PNG 和根目录 `public/favicon.ico`（含 16/32/48px）作为兼容格式。图标链接使用独立文件名或版本参数，避免沿用旧图标缓存；浅色和深色模式均使用同一图案。
 - 首页欢迎语：src/components/FanWelcome.astro
 - 文章：src/content/posts/，复用 Fuwari 原生 Markdown；追星手记 category 只填“线下”或“生日”，科研文章填“科研手记”。
-- 科研手记模板：templates/research-note.md，复制并修改后再放进 src/content/posts/，不要直接把模板作为文章发布。
+- 科研随笔模板：templates/research-note.md（可直接复制到 src/content/posts/）；Obsidian 版本：templates/obsidian/科研随笔.md。
+- 追星随笔模板：templates/fan-note.md（可直接复制到 src/content/posts/）；Obsidian 版本：templates/obsidian/追星随笔.md。
+- 模板默认 draft: true，确认内容、日期和事实后再改为 false；完整说明见 templates/README.md。
 - 关于页面：src/content/spec/about.md
 - 科研手记入口：src/pages/research.astro，按 category 自动收录；旧收藏入口重定向至科研手记。
 - 专辑封面：src/data/albums.ts 与 public/images/albums/。简介区 Spotify、Threads、Instagram 均为 44×44 纯图标按钮；点击 Spotify 直接打开“我喜欢的专辑”九宫格，底部“打开 Spotify 主页”在新标签页跳转。无中间菜单、展开箭头或数量副标题；按 Esc、关闭图标或遮罩空白处关闭。
@@ -74,6 +76,14 @@ export const photos: FanPhoto[] = [
 - 顶部背景：public/images/background-3600.webp，由用户提供的 background-3600.png 生成 3600×3600 WebP 副本；原图保持不变。主题色已固定，历史浏览器配色不会覆盖新版主题。
 - 首页标题为“欢迎来到Junnie的个人主页”，描述为“这里记录追星和科研日常”。原欢迎文章已删除；没有手记时首页仍显示欢迎区、团体卡片和追星地图。
 - 追星地图：src/components/FanMap.astro 与 src/data/fan-map.ts；照片与场次通过 photos.ts 中的 eventId 关联。
+
+## Obsidian 写作模板（2026-10-21）
+
+- 仓库源文件：`templates/obsidian/科研随笔.md`、`templates/obsidian/追星随笔.md`。
+- Obsidian vault 的 `90templates/` 目录存放模板；模板使用普通属性，没有 `{{...}}` 占位符，日期用日期属性、草稿用复选框。
+- vault 的 `60site/` 是指向 `src/content/posts/` 的本地目录链接；在 Obsidian 的 `60site` 中新建或编辑的笔记就是站点文章，不需要再复制。该目录已加入 Nutstore Sync 排除规则，站点内容由 Git 保留；不要删除或移动这个链接目录。
+- 在 `60site` 新建笔记后执行“模板：插入模板”，直接修改属性面板里的标题、日期、描述、标签和分类；确认后取消 `draft` 勾选，再构建/发布。
+- 科研随笔的 category 固定为 `科研手记`；追星随笔只能是 `线下` 或 `生日`。`60site` 是真实站点目录的链接，不要删除或移动；完整流程见 `templates/README.md`。
 
 ## 首页布局（2026-10-18 手机优先改版）
 
