@@ -21,4 +21,10 @@
 
 ## 发布
 
-推送与最终正式构建部署后，追加提交、实际 Worker 版本、正式域名内容/封面/资源哈希及线上验证结果。只部署 `fuwari/dist/`，不部署测试副本。
+- 应用/内容提交 **`383b692`** 已推送 `origin/main`。从 `fuwari/` 再次完整构建后发布现有 Worker；只使用正式 `fuwari/dist/`，没有部署测试副本。
+- 初次手动版本 `0ad41894-cc21-4293-8283-3c7022b45feb` 发布后，09:48:51 UTC 出现额外版本 **`025ba885-6338-44c6-9106-011da42aeb70`**，在验证中途替换资源，导致旧 props 模块 404 和一次浏览器等待超时。两份初次失败报告保留 `outputs/now-update-release-live-20261021-initial.json`、`now-update-20261021-live-release-initial.json`，不计为通过，也不把这次手动版本记作最终版本。
+- 额外发布结束后，重新部署本机已验收 dist；最终版本为 **`81e50946-b7d4-4b59-9efc-99ad3e3d459f`**。沿用 fuwari、同一 Cloudflare 账户、域名与 ASSETS；CSP/安全头未改。
+- 本地 Worker 下近况 6 组及真实搜索/CSP 专项通过。最终正式域名 `https://home.wonyoung.xyz/` 的 6 路由 × 3 尺寸 × 浅深色通过，无横向溢出/未捕获异常/CSP 违规；真实搜索/高亮、专辑/地图焦点、相册筛选/放大、HTTP 308、旧入口 301 与 RSS 范围通过。矩阵仅拦截可选 Cloudflare analytics；独立近况专项未屏蔽该资源，保留本机 DNS 错误。
+- 线上近况另测 6 组，三个栏目、2026.10.21 日期和当前链接正确；封面与标题各自触发正确的新标签页，opener 为 null。此项只拦截已知外站目标导航，不声称外站播放/登录已测。Swup 往返通过；**两张新封面 SHA256 与本地原定 WebP 精确一致**，无旧封面误用。
+- 8 条页面/RSS/站点地图路由引用与 **47 个 JS/CSS/Pagefind 文件 SHA256** 全部匹配最终本地构建，串行无网络重试。证据：`outputs/now-update-release-live-20261021.json`、`now-update-live-20261021.json`、`now-update-20261021-live-release.json`；本地 Worker 证据 `now-update-worker-local-20261021.json`、`security-policy-now-update-local-20261021.json`。
+- 验收后仅文档发布记录使用 `[skip ci]`，应用提交未跳过检查。若需回退，先核对实际部署，再对原 fuwari 回退至 **`1bd525e8-03b6-4348-ad11-9df16baa8caf`**；这会恢复前一份近况而保留上一轮性能优化，不做破坏性 Git reset。
