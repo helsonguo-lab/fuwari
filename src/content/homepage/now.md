@@ -1,16 +1,16 @@
 ---
-updated: "2026-10-18"
+updated: "2026-10-21"
 draft: false
 music:
-  title: "drop dead"
-  artist: "Olivia Rodrigo"
-  cover: "/images/now/drop-dead-olivia-rodrigo.webp"
-  spotify: "https://open.spotify.com/track/6gkbtMtioHgtyGjrMel6ei"
+  title: "WHIP (JIWOO & KYUJIN)"
+  artist: "NMIXX"
+  cover: "/images/now/whip-nmixx-strange-muse.webp"
+  spotify: "https://open.spotify.com/track/0QlRS2XCfC0A9cePXVqcDv"
 reading:
   type: "漫画"
-  title: "来自深渊"
-  cover: "/images/now/made-in-abyss-vol-1.webp"
-  douban: "https://book.douban.com/subject/27090965/"
+  title: "电锯人"
+  cover: "/images/now/chainsaw-man-vol-1.webp"
+  official: "https://www.shonenjump.com/j/rensai/chainsaw/"
 thought: "NMIXX回归大发"
 ---
 

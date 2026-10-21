@@ -5,7 +5,9 @@ import { url } from "../utils/url-utils";
 interface Props { now?: CollectionEntry<"homepage">["data"]; }
 const { now } = Astro.props;
 const MusicRow = now?.music?.spotify ? "a" : "div";
-const ReadingRow = now?.reading?.douban ? "a" : "div";
+const readingUrl = now?.reading?.official ?? now?.reading?.douban;
+const ReadingRow = readingUrl ? "a" : "div";
+const readingPlatform = now?.reading?.official ? "官方网站" : "豆瓣";
 ---
 {now && <section class="surface-home now-note mb-4" aria-labelledby="now-title" data-pagefind-ignore>
   <header>
@@ -20,10 +22,10 @@ const ReadingRow = now?.reading?.douban ? "a" : "div";
         {now.music.note && <p class="now-detail">{now.music.note}</p>}
       </div>
     </MusicRow>}
-    {now.reading && <ReadingRow class="now-row" href={now.reading.douban} target={now.reading.douban ? "_blank" : undefined} rel={now.reading.douban ? "noopener noreferrer" : undefined} aria-label={now.reading.douban ? `在豆瓣打开《${now.reading.title}》（新标签页）` : undefined}>
+    {now.reading && <ReadingRow class="now-row" href={readingUrl} target={readingUrl ? "_blank" : undefined} rel={readingUrl ? "noopener noreferrer" : undefined} aria-label={readingUrl ? `在${readingPlatform}打开《${now.reading.title}》（新标签页）` : undefined}>
       <span class="now-label">最近在看</span>
       <div class="reading-cover"><img src={url(now.reading.cover)} alt={`${now.reading.title} ${now.reading.type}封面`} loading="lazy" decoding="async" /></div>
-      <div class="now-copy"><p class="now-name">{now.reading.title}{now.reading.douban && <Icon name="material-symbols:open-in-new-rounded" class="now-external" aria-hidden="true" />}</p>
+      <div class="now-copy"><p class="now-name">{now.reading.title}{readingUrl && <Icon name="material-symbols:open-in-new-rounded" class="now-external" aria-hidden="true" />}</p>
         {now.reading.note && <p class="now-detail">{now.reading.note}</p>}
       </div>
     </ReadingRow>}

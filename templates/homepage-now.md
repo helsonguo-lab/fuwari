@@ -12,6 +12,7 @@ draft: true
 #   title: "用户填写的名称"
 #   cover: "/images/now/已准备的封面.webp"
 #   douban: "" # 可选：漫画 / 书籍用 https://book.douban.com/subject/…/，电影用 movie.douban.com
+#   official: "" # 可选：已支持 https://www.shonenjump.com/j/rensai/作品名/；填写后优先于豆瓣
 #   note: "可选短评"
 # thought: "用户填写的碎碎念"
 ---

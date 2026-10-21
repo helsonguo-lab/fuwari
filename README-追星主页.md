@@ -125,6 +125,7 @@ export const photos: FanPhoto[] = [
 - 内容全在 frontmatter：`updated: "YYYY-MM-DD"`、`draft`，可选 `music`、`reading`、`thought`。不解析正文栏目，不从聊天或组件里保留另一份近况。
 - 音乐填写 `title`、`cover`，可选 `artist` / `note`；阅读填写 `type`（漫画 / 书籍 / 电影）、`title`、`cover`，可选 `note`。
 - 音乐可填 `spotify: "https://open.spotify.com/track/歌曲ID"`，阅读可填 `douban: "https://book.douban.com/subject/条目ID/"`（电影使用 `movie.douban.com`）。填写后整行的封面 / 名称可点击，在新标签页打开作品详情；留空仍显示普通内容。构建会拒绝错误平台、非 HTTPS、非作品详情页或漫画 / 书籍误链电影的地址，不自动猜链接，也不拉取播放数据。
+- 阅读也可填 `official`，目前仅支持已核验的 `https://www.shonenjump.com/j/rensai/作品名/` 官方漫画详情页；优先于 `douban`，不接受任意外链、登录信息、非标准端口或查询/片段。链接名称与辅助说明会标为“官方网站”，旧豆瓣配置继续兼容。
 - 封面须使用本地 `/images/now/` 或其他已有 `/images/` 路径；同封面可直接复用 `/images/albums/`。新封面用用户提供或确认的素材，生成网页副本、保留原件并记录来源。
 - 日期由用户维护，只显示 `YYYY.MM.DD`，绝不用构建时间替代。草稿、三栏全空时整块隐藏，空白栏目不渲染；有音乐 / 阅读项时名称与真实封面不可缺。
 - 改为 `draft: false` 且填好素材后重新构建即可显示，不用改组件。
@@ -146,6 +147,8 @@ export const photos: FanPhoto[] = [
 4. **仅当本次请求授权发布时**提交 / 推送 / 发布现有 Worker，再查正式域名、记录版本与交接。自动读取不代表定时任务或不构建就实时更新。
 
 2026-10-18 已按用户提供的内容正式启用近况：最近在听 `drop dead`（Olivia Rodrigo，官方专辑封面）、最近在看 `来自深渊`（漫画第 1 卷官方封面）、最近在想 `NMIXX回归大发`；封面来源与哈希见 `public/images/now/SOURCES.md`。精选回忆仍没有用户确认的照片情绪原话，因此保持草稿并隐藏入口，不能为演示发布虚构感受。选型、固定版本、许可与适配理由见 `docs/homepage-modules.md` / `THIRD-PARTY-NOTICES.md`。
+
+2026-10-21 近况按用户本次请求更新为 `WHIP (JIWOO & KYUJIN)`（NMIXX，《Strange Muse》）与漫画《电锯人》（原名《チェンソーマン》）；“NMIXX回归大发”原文不变。歌曲跳转 Spotify，漫画跳转集英社官方作品页；新封面已本地化，旧素材保留。来源见 `public/images/now/SOURCES.md`，发布记录见 `docs/now-update-2026-10-21.md`。
 
 ## 更新线上网站
 

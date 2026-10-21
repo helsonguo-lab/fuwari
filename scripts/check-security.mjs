@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { GithubCardComponent } from "../src/plugins/rehype-component-github-card.mjs";
 import { parseDirectiveNode } from "../src/plugins/remark-directive-rehype.js";
 import { remarkContentSafety } from "../src/plugins/remark-content-safety.mjs";
+import { isOfficialReadingUrl } from "../src/utils/homepage-links.ts";
 import { localSearchUrl } from "../src/utils/search-results.ts";
 import { serializeJson } from "../src/utils/serialize-json.ts";
 import worker, { securityHeaders } from "../worker/index.ts";
@@ -75,6 +76,11 @@ assert.equal(localSearchUrl("//evil.com/x", searchBase), undefined);
 assert.equal(localSearchUrl("https://evil.com/x", searchBase), undefined);
 assert.equal(localSearchUrl("https://user:pass@home.wonyoung.xyz/x", searchBase), undefined);
 
+assert.equal(isOfficialReadingUrl("https://www.shonenjump.com/j/rensai/chainsaw/"), true);
+for (const link of ["javascript:alert(1)", "http://www.shonenjump.com/j/rensai/chainsaw/", "//www.shonenjump.com/j/rensai/chainsaw/", "https://www.shonenjump.com.evil.example/j/rensai/chainsaw/", "https://user:pass@www.shonenjump.com/j/rensai/chainsaw/", "https://www.shonenjump.com:8443/j/rensai/chainsaw/", "https://www.shonenjump.com/j/rensai/chainsaw/?redirect=https://evil.example", "https://www.shonenjump.com/j/rensai/chainsaw/#x", "https://www.shonenjump.com/j/"]) {
+	assert.equal(isOfficialReadingUrl(link), false, link);
+}
+
 const env = { ASSETS: { fetch: async () => new Response("missing", { status: 404 }) } };
 const redirect = await worker.fetch(new Request("http://home.wonyoung.xyz/gallery/?group=IVE"), env);
 assert.equal(redirect.status, 308);
@@ -89,4 +95,4 @@ for (const [agent, expected] of [["pnpm/11.25.0 npm/? node/?", 0], ["pnpm/9.0.0"
 	const result = spawnSync(process.execPath, ["scripts/check-package-manager.cjs"], { env: { ...process.env, npm_config_user_agent: agent } });
 	assert.equal(result.status, expected);
 }
-console.log("Security boundary checks passed (JSON-LD, Markdown, directive allowlist, search URLs, Worker and package manager).");
+console.log("Security boundary checks passed (JSON-LD, Markdown, directive allowlist, search URLs, official reading links, Worker and package manager).");

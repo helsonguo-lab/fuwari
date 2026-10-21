@@ -24,3 +24,10 @@ recorded in [`public/fonts/zhimangxing/SOURCE.md`](public/fonts/zhimangxing/SOUR
 Existing markdown-it 14.1.0 / sanitize-html 2.17.0 / Sharp and Astro's Zod/content
 collections are reused, not replaced. Photo rights remain with their original
 owners; the new feature reuses user-provided photos and invents no user content.
+
+Now-section artwork is separately copyrighted, not MIT/OFL licensed. The NMIXX
+Strange Muse cover is supplied by Apple Music (JYP Entertainment); the Chainsaw
+Man volume 1 cover is supplied by Shueisha (© 藤本タツキ／集英社). Artwork is used
+only to identify the user-selected works; no ownership or open reuse permission
+is claimed. Sources, original/web-copy hashes and retained historical artwork
+are documented in `public/images/now/SOURCES.md`.

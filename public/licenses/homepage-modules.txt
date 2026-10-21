@@ -35,3 +35,9 @@ SOFTWARE.
 
 Zhi Mang Xing is separately licensed under SIL OFL 1.1.
 Its complete license is at /fonts/zhimangxing/OFL.txt, not under MIT.
+
+Now-section cover artwork is not covered by MIT or OFL:
+- NMIXX, Strange Muse: JYP Entertainment; official artwork supplied by Apple Music.
+- Chainsaw Man volume 1: © 藤本タツキ／集英社; official artwork supplied by Shueisha.
+Artwork rights remain with their owners; no open reuse permission is claimed.
+Sources, provenance and hashes: /images/now/SOURCES.md.
