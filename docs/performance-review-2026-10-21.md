@@ -48,4 +48,11 @@
 
 - 发布前 Git 基线：`bd615ca`；实查现有 Worker 当前版本：`9eb10465-a8f2-4d3a-b88b-1f4f47692163`。后者为保留安全策略的发布前回退目标。
 - 推送不等于部署成功。正式 `fuwari/dist/` 是唯一部署产物；不部署任何 fixture。发布后须再次核对正式域名、资源 SHA256 和实际部署版本，防止 Git 自动构建覆盖已验产物。
-- 实际提交、部署、域名验证记录在完成后追加。
+- 已有改动提交 **`58e4ed2`**；性能优化提交 **`b3a9073`**，均已推送 `origin/main`。
+- 推送后实际出现额外发布 `c15a2997-f63a-44ea-9735-c5c98f7e1204`（09:21:12 UTC），再次说明不能把 Git push 与已验证的本地产物等同。正式源码重新完整检查/构建后，从 `fuwari/` 执行 `wrangler deploy --keep-vars`；最终已核对版本为 **`1bd525e8-03b6-4348-ad11-9df16baa8caf`**（09:22:12 UTC），现有 Worker/账户/域名与 ASSETS 不变。上传中有一次由 Wrangler 自动重试的瞬态失败，随后全部上传及部署成功，不将初次尝试记作单独成功。
+- 正式构建仍为 6 页、Pagefind 5 页 / 259 words；预检不存在 fixture/回忆模板混入。切换共享已有依赖的隔离副本后，首次 check 的 glob-loader 曾提示 now 缓存重复；源码实际只有一份 now.md，随后的完整正式 build 无该提示，产物路由、正文和索引数量已单独复核。没有复制隔离副本的 dist。
+- 正式域名 `https://home.wonyoung.xyz/`：8 条页面/RSS/站点地图路由引用正确，**47 个直接/动态 JS、CSS 及 Pagefind 索引文件 SHA256 全部与最终本地 dist 一致**（串行下载、无网络重试）。证据：`outputs/performance-release-live-20261021.json`。
+- 线上矩阵 6 路由 × 3 尺寸 × 浅深色通过：布局/侧栏正确、无横向溢出/未捕获错误/CSP 违规；真实搜索高亮、专辑/地图及焦点、相册 9/4/5 筛选/放大通过。HTTP 308 保留路径/查询，旧入口 301、RSS 范围和 fixture 404 通过。矩阵仅拦截本机已知 DNS 失败的可选 Cloudflare analytics，本站资源均为真实请求，见 `outputs/performance-20261021-live-release.json`。
+- 未拦截第三方请求的线上 CSP/搜索专项也通过（0 页面错误 / 0 CSP 违规），保留 6 条 DNS 网络控制台报错，不将它们记为无网络错误，见 `security-policy-performance-live-20261021.json`。线上 5 轮 Swup/专辑/地图/相册生命周期通过，见 `security-lifecycle-performance-live-20261021.json`。
+- GitHub Actions 公开 API 在本轮返回空 runs，因此不声称远端 CI 通过。运行代码提交未跳过检查；验收后仅此发布记录的 documentation-only 提交使用 `[skip ci]`，避免不必要的 Git 自动构建替换已验证资产。
+- 如需回退，核对当前版本后可对同一 fuwari 回退至发布前 **`9eb10465-a8f2-4d3a-b88b-1f4f47692163`**；不使用 git reset 丢弃后续工作。该版本保留上一轮安全策略，但不含本次性能优化和本次带发的既有改动。
